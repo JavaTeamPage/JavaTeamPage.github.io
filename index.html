@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>JAVATEAM - Official</title>
+    
+    <link rel="icon" href="image/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Официальный сайт киберспортивной команды JAVATEAM">
+    <meta name="keywords" content="Standoff2, киберспорт, команда, праки, соревнования">
+    <meta name="author" content="Beralva">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;800&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="page">
+
+    <header class="topbar">
+        <!-- LOGO -->
+        <div class="logo">
+            <img src="image/logo.png" alt="logo">
+            <span>JavaTeam</span>
+        </div>
+
+        <!-- МЕНЮ (4 кнопки) -->
+        <nav class="menu">
+            <button class="menu-btn active" data-page="info">
+                <div class="menu-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <span>ИНФО</span>
+            </button>
+
+            <button class="menu-btn" data-page="members">
+                <div class="menu-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <span>СОСТАВ</span>
+            </button>
+
+            <button class="menu-btn" data-page="praki">
+                <div class="menu-icon">
+                    <i class="fas fa-crosshairs"></i>
+                </div>
+                <span>ПРАКИ</span>
+            </button>
+
+            <button class="menu-btn" data-page="history">
+                <div class="menu-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <span>ИСТОРИЯ</span>
+            </button>
+        </nav>
+
+        <!-- Индикатор текущей страницы -->
+        <div class="page-indicator"></div>
+    </header>
+
+    <main class="page-content">
+        <!-- ******************************************************* -->
+        <!-- INFO -->
+        <!-- ******************************************************* -->
+        <section class="page-block active" id="info">
+            <div class="info-container">
+                <!-- ВЕРХНИЙ БЛОК -->
+                <div class="info-top">
+                    <div class="info-bg-text">JAVATEAM</div>
+                    
+                    <div class="info-content">
+                        <div class="info-title-wrapper">
+                            <div class="info-subtitle">КОМАНДА КИБЕРСПОРТА</div>
+                            <div class="info-title">
+                                <span class="title-word">БУДУЩАЯ</span>
+                                <span class="title-word">КОМАНДА</span>
+                                <span class="title-word">STANDOFF</span>
+                                <span class="title-word highlight">2</span>
+                            </div>
+                        </div>
+
+                        <div class="team-name">
+                            <span class="team-letter">J</span>
+                            <span class="team-letter">A</span>
+                            <span class="team-letter">V</span>
+                            <span class="team-letter">A</span>
+                            <span class="team-space"></span>
+                            <span class="team-letter">T</span>
+                            <span class="team-letter">E</span>
+                            <span class="team-letter">A</span>
+                            <span class="team-letter">M</span>
+                        </div>
+
+                        <button class="submit-btn info-join-btn">
+                            <div class="btn-content">
+                                <span>ЗАБРОНИРОВАТЬ ПРАК</span>
+                                <div class="btn-icon">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- НИЖНИЙ БЛОК -->
+                <div class="info-text">
+                    <div class="info-text-header">
+                        <i class="fas fa-quote-left"></i>
+                        <h3>ДОБРО ПОЖАЛОВАТЬ</h3>
+                        <i class="fas fa-quote-right"></i>
+                    </div>
+                    
+                    <div class="info-text-content">
+                        <p>Мы рады видеть, что вы посетили наш официальный сайт команды <span class="highlight-text">JavaTeam</span>! Для нас любой прак — это серьёзная игра, где ключевую роль играет командная работа и стратегия.</p>
+                        
+                        <div class="info-features">
+                            <div class="feature">
+                                <div class="feature-icon">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div class="feature-text">Профессиональный подход</div>
+                            </div>
+                            
+                            <div class="feature">
+                                <div class="feature-icon">
+                                    <i class="fas fa-users-cog"></i>
+                                </div>
+                                <div class="feature-text">Слаженная командная работа</div>
+                            </div>
+                            
+                            <div class="feature">
+                                <div class="feature-icon">
+                                    <i class="fas fa-bullseye"></i>
+                                </div>
+                                <div class="feature-text">Постоянное развитие</div>
+                            </div>
+                        </div>
+                        
+                        <p class="call-to-action">Вы можете забронировать прак во вкладке <span class="highlight-text">"Праки"</span> и бросить вызов нашей команде. Будем ждать!</p>
+                    </div>
+                    
+                    <div class="info-stats">
+                        <div class="stat">
+                            <div class="stat-number" id="info-total-games">0</div>
+                            <div class="stat-label">ПРОВЕДЕННЫХ ПРАКОВ</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="info-wins">0</div>
+                            <div class="stat-label">ПОБЕД</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number" id="info-members-count">9</div>
+                            <div class="stat-label">ИГРОКОВ В КОМАНДЕ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ******************************************************* -->
+        <!-- MEMBERS -->
+        <!-- ******************************************************* -->
+        <section class="page-block" id="members">
+            <div class="members-container">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <div class="section-title-bg">СОСТАВ</div>
+                        <h2 class="section-title">НАША КОМАНДА</h2>
+                    </div>
+                    <div class="section-subtitle">Лучшие игроки, объединенные одной целью — победой</div>
+                    <div class="section-line"></div>
+                </div>
+
+                <!-- ОСНОВНЫЕ ИГРОКИ -->
+                <div class="members-category">
+                    <div class="category-header">
+                        <div class="category-icon">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <h3>ОСНОВНОЙ СОСТАВ</h3>
+                        <div class="category-badge">5 игроков</div>
+                    </div>
+                    
+                    <div class="members-grid">
+                        <!-- Игрок 1 -->
+                        <div class="member-card" data-player="v3k">
+                            <div class="member-card-inner">
+                                <div class="member-image">
+                                    <img src="https://via.placeholder.com/350x200/ffd700/000?text=V3k" alt="V3k">
+                                    <div class="member-rank">LEGENDARY EAGLE</div>
+                                </div>
+                                <div class="member-info">
+                                    <div class="member-header">
+                                        <div class="member-name">V3k</div>
+                                        <div class="member-role">
+                                            <i class="fas fa-crown"></i>
+                                            КАПИТАН
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-stats">
+                                        <div class="stat">
+                                            <div class="stat-value">1.5</div>
+                                            <div class="stat-label">K/D</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">75%</div>
+                                            <div class="stat-label">Хедшоты</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">98</div>
+                                            <div class="stat-label">ADR</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-desc">
+                                        Стратег команды, отвечает за тактические построения и контроль темпа игры.
+                                    </div>
+                                    
+                                    <div class="member-skills">
+                                        <span class="skill">Стратегия</span>
+                                        <span class="skill">IGL</span>
+                                        <span class="skill">AWP</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Игрок 2 -->
+                        <div class="member-card" data-player="paradox">
+                            <div class="member-card-inner">
+                                <div class="member-image">
+                                    <img src="https://via.placeholder.com/350x200/9d00ff/fff?text=Paradox" alt="Paradox">
+                                    <div class="member-rank">LEGENDARY EAGLE</div>
+                                </div>
+                                <div class="member-info">
+                                    <div class="member-header">
+                                        <div class="member-name">Paradox</div>
+                                        <div class="member-role">
+                                            <i class="fas fa-user-ninja"></i>
+                                            ЛЮРКЕР
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-stats">
+                                        <div class="stat">
+                                            <div class="stat-value">1.3</div>
+                                            <div class="stat-label">K/D</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">68%</div>
+                                            <div class="stat-label">Хедшоты</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">89</div>
+                                            <div class="stat-label">ADR</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-desc">
+                                        Мастер скрытных перемещений и неожиданных атак со спины противника.
+                                    </div>
+                                    
+                                    <div class="member-skills">
+                                        <span class="skill">Фланги</span>
+                                        <span class="skill">Скрытность</span>
+                                        <span class="skill">Клинер</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Игрок 3 -->
+                        <div class="member-card" data-player="maybe">
+                            <div class="member-card-inner">
+                                <div class="member-image">
+                                    <img src="https://via.placeholder.com/350x200/00ff88/000?text=Maybe%3F" alt="Maybe?">
+                                    <div class="member-rank">SUPREME</div>
+                                </div>
+                                <div class="member-info">
+                                    <div class="member-header">
+                                        <div class="member-name">Maybe?</div>
+                                        <div class="member-role">
+                                            <i class="fas fa-crosshairs"></i>
+                                            СНАЙПЕР
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-stats">
+                                        <div class="stat">
+                                            <div class="stat-value">1.8</div>
+                                            <div class="stat-label">K/D</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">82%</div>
+                                            <div class="stat-label">Хедшоты</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">105</div>
+                                            <div class="stat-label">ADR</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-desc">
+                                        Снайпер с невероятной точностью. Может выиграть раунд одним удачным выстрелом.
+                                    </div>
+                                    
+                                    <div class="member-skills">
+                                        <span class="skill">AWP</span>
+                                        <span class="skill">Хедшоты</span>
+                                        <span class="skill">Опенер</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Игрок 4 -->
+                        <div class="member-card" data-player="blast">
+                            <div class="member-card-inner">
+                                <div class="member-image">
+                                    <img src="https://via.placeholder.com/350x200/ff4757/fff?text=Blast" alt="Blast">
+                                    <div class="member-rank">LEGENDARY EAGLE</div>
+                                </div>
+                                <div class="member-info">
+                                    <div class="member-header">
+                                        <div class="member-name">Blast</div>
+                                        <div class="member-role">
+                                            <i class="fas fa-bomb"></i>
+                                            РИФЛЕР
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-stats">
+                                        <div class="stat">
+                                            <div class="stat-value">1.4</div>
+                                            <div class="stat-label">K/D</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">71%</div>
+                                            <div class="stat-label">Хедшоты</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">92</div>
+                                            <div class="stat-label">ADR</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-desc">
+                                        Агрессивный рифлер, специалист по входам на сайты и созданию пространства для команды.
+                                    </div>
+                                    
+                                    <div class="member-skills">
+                                        <span class="skill">Энтри</span>
+                                        <span class="skill">Агрессия</span>
+                                        <span class="skill">Трейд</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Игрок 5 -->
+                        <div class="member-card" data-player="snowy">
+                            <div class="member-card-inner">
+                                <div class="member-image">
+                                    <img src="https://via.placeholder.com/350x200/0099ff/fff?text=Snowy" alt="Snowy">
+                                    <div class="member-rank">DISTINGUISHED MASTER</div>
+                                </div>
+                                <div class="member-info">
+                                    <div class="member-header">
+                                        <div class="member-name">Snowy</div>
+                                        <div class="member-role">
+                                            <i class="fas fa-running"></i>
+                                            ОПЕНФРАГЕР
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-stats">
+                                        <div class="stat">
+                                            <div class="stat-value">1.2</div>
+                                            <div class="stat-label">K/D</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">65%</div>
+                                            <div class="stat-label">Хедшоты</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">85</div>
+                                            <div class="stat-label">ADR</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-desc">
+                                        Быстрый и мобильный игрок, специализируется на открытии фрагов и разведке.
+                                    </div>
+                                    
+                                    <div class="member-skills">
+                                        <span class="skill">Скорость</span>
+                                        <span class="skill">Разведка</span>
+                                        <span class="skill">Патруль</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ТРЕНЕР И РЕКРУТ -->
+                <div class="members-category">
+                    <div class="category-header">
+                        <div class="category-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <h3>ПОДДЕРЖКА</h3>
+                        <div class="category-badge">2 человека</div>
+                    </div>
+                    
+                    <div class="members-grid">
+                        <!-- Тренер -->
+                        <div class="member-card coach-card" data-player="pastic">
+                            <div class="member-card-inner">
+                                <div class="member-image">
+                                    <img src="https://via.placeholder.com/350x200/ffd700/000?text=Pastic" alt="Pastic">
+                                    <div class="member-rank">ТРЕНЕР</div>
+                                </div>
+                                <div class="member-info">
+                                    <div class="member-header">
+                                        <div class="member-name">Pastic</div>
+                                        <div class="member-role">
+                                            <i class="fas fa-chalkboard-teacher"></i>
+                                            ТРЕНЕР
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-stats">
+                                        <div class="stat">
+                                            <div class="stat-value">7+</div>
+                                            <div class="stat-label">Лет опыта</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">50+</div>
+                                            <div class="stat-label">Турниров</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">100%</div>
+                                            <div class="stat-label">Отдача</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-desc">
+                                        Опытный тренер с глубоким пониманием игры. Отвечает за тактическую подготовку и анализ соперников.
+                                    </div>
+                                    
+                                    <div class="member-skills">
+                                        <span class="skill">Тактика</span>
+                                        <span class="skill">Анализ</span>
+                                        <span class="skill">Психология</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Рекрут -->
+                        <div class="member-card recruit-card" data-player="exlusev">
+                            <div class="member-card-inner">
+                                <div class="member-image">
+                                    <img src="https://via.placeholder.com/350x200/00ff88/000?text=exluseV" alt="exluseV">
+                                    <div class="member-rank">РЕКРУТ</div>
+                                </div>
+                                <div class="member-info">
+                                    <div class="member-header">
+                                        <div class="member-name">exluseV</div>
+                                        <div class="member-role">
+                                            <i class="fas fa-seedling"></i>
+                                            РЕКРУТ
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-stats">
+                                        <div class="stat">
+                                            <div class="stat-value">1.6</div>
+                                            <div class="stat-label">K/D</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">74%</div>
+                                            <div class="stat-label">Хедшоты</div>
+                                        </div>
+                                        <div class="stat">
+                                            <div class="stat-value">95</div>
+                                            <div class="stat-label">ADR</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="member-desc">
+                                        Перспективный игрок с большим потенциалом. Проходит адаптацию к командной игре.
+                                    </div>
+                                    
+                                    <div class="member-skills">
+                                        <span class="skill">Потенциал</span>
+                                        <span class="skill">Адаптация</span>
+                                        <span class="skill">Мотивация</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ******************************************************* -->
+        <!-- PRAKI -->
+        <!-- ******************************************************* -->
+        <section class="page-block" id="praki">
+            <div class="praki-container">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <div class="section-title-bg">PRAKI</div>
+                        <h2 class="section-title">БРОНИРОВАНИЕ ПРАКОВ</h2>
+                    </div>
+                    <div class="section-subtitle">Забронируйте время для тренировочного матча с нашей командой</div>
+                    <div class="section-line"></div>
+                </div>
+
+                <!-- ФОРМА БРОНИРОВАНИЯ -->
+                <div class="praki-form-container">
+                    <div class="praki-form">
+                        <div class="praki-field">
+                            <div class="field-label">
+                                <i class="fas fa-users"></i>
+                                Название вашей команды
+                            </div>
+                            <input type="text" class="form-input" id="team-name" placeholder="Введите название вашей команды" required>
+                        </div>
+                        
+                        <div class="praki-field">
+                            <div class="field-label">
+                                <i class="fas fa-user"></i>
+                                Ваш никнейм (капитан)
+                            </div>
+                            <input type="text" class="form-input" id="captain-name" placeholder="Ваш игровой никнейм" required>
+                        </div>
+                        
+                        <div class="praki-field">
+                            <div class="field-label">
+                                <i class="fas fa-users"></i>
+                                Состав команды (через запятую)
+                            </div>
+                            <input type="text" class="form-input" id="team-roster" placeholder="Например: Player1, Player2, Player3, Player4, Player5" required>
+                        </div>
+                        
+                        <div class="praki-field">
+                            <div class="field-label">
+                                <i class="fas fa-clock"></i>
+                                Выберите время
+                            </div>
+                            <div class="time-slots">
+                                <button class="time-slot" data-time="18:00">
+                                    <div class="time-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="time-text">18:00</div>
+                                    <div class="time-status available" id="status-18">Свободно</div>
+                                </button>
+                                
+                                <button class="time-slot" data-time="19:00">
+                                    <div class="time-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="time-text">19:00</div>
+                                    <div class="time-status available" id="status-19">Свободно</div>
+                                </button>
+                                
+                                <button class="time-slot" data-time="20:00">
+                                    <div class="time-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="time-text">20:00</div>
+                                    <div class="time-status available" id="status-20">Свободно</div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- ВЫБОР КАРТ STANDOFF 2 -->
+                        <div class="praki-maps-section">
+                            <div class="maps-title">
+                                <i class="fas fa-map"></i>
+                                ВЫБЕРИТЕ КАРТЫ STANDOFF 2 (минимум 1)
+                            </div>
+                            
+                            <div class="praki-maps">
+                                <button class="map-btn" data-map="hanami">
+                                    <div class="map-btn-icon">
+                                        <i class="fas fa-leaf"></i>
+                                    </div>
+                                    <span>HANAMI</span>
+                                </button>
+                                
+                                <button class="map-btn" data-map="rust">
+                                    <div class="map-btn-icon">
+                                        <i class="fas fa-industry"></i>
+                                    </div>
+                                    <span>RUST</span>
+                                </button>
+                                
+                                <button class="map-btn" data-map="zone7">
+                                    <div class="map-btn-icon">
+                                        <i class="fas fa-warehouse"></i>
+                                    </div>
+                                    <span>ZONE 7</span>
+                                </button>
+                                
+                                <button class="map-btn" data-map="dune">
+                                    <div class="map-btn-icon">
+                                        <i class="fas fa-sun"></i>
+                                    </div>
+                                    <span>DUNE</span>
+                                </button>
+                                
+                                <button class="map-btn" data-map="breeze">
+                                    <div class="map-btn-icon">
+                                        <i class="fas fa-wind"></i>
+                                    </div>
+                                    <span>BREEZE</span>
+                                </button>
+                                
+                                <button class="map-btn" data-map="province">
+                                    <div class="map-btn-icon">
+                                        <i class="fas fa-city"></i>
+                                    </div>
+                                    <span>PROVINCE</span>
+                                </button>
+                                
+                                <button class="map-btn" data-map="sandstone">
+                                    <div class="map-btn-icon">
+                                        <i class="fas fa-mountain"></i>
+                                    </div>
+                                    <span>SANDSTONE</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="praki-field">
+                            <div class="field-label">
+                                <i class="fas fa-comment"></i>
+                                Комментарий (необязательно)
+                            </div>
+                            <textarea class="form-input" id="comment" placeholder="Дополнительная информация, особые пожелания..." rows="3"></textarea>
+                        </div>
+                        
+                        <button class="submit-btn praki-submit-btn">
+                            <div class="btn-content">
+                                <span>ЗАБРОНИРОВАТЬ ВРЕМЯ</span>
+                                <div class="btn-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                            </div>
+                        </button>
+                        
+                        <div class="booking-info">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Время сбрасывается каждый день в 00:00. Доступны только слоты 18:00, 19:00, 20:00.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ТАБЛИЦА БРОНИРОВАНИЙ -->
+                <div class="bookings-container">
+                    <div class="section-header">
+                        <div class="section-title-wrapper">
+                            <div class="section-title-bg">БРОНИ</div>
+                            <h2 class="section-title">ЗАБРОНИРОВАННЫЕ ВРЕМЕНА</h2>
+                        </div>
+                        <div class="section-subtitle">Команды, которые уже забронировали время на сегодня</div>
+                        <div class="section-line"></div>
+                    </div>
+
+                    <div class="bookings-table-container">
+                        <table class="bookings-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-clock"></i> Время</th>
+                                    <th><i class="fas fa-users"></i> Команда</th>
+                                    <th><i class="fas fa-user"></i> Капитан</th>
+                                    <th><i class="fas fa-user-friends"></i> Состав</th>
+                                    <th><i class="fas fa-map"></i> Карты</th>
+                                    <th><i class="fas fa-calendar"></i> Дата брони</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookings-table-body">
+                                <!-- Данные будут загружены через JS -->
+                            </tbody>
+                        </table>
+                        
+                        <div id="no-bookings-message" class="no-bookings-message">
+                            <i class="fas fa-calendar-times"></i>
+                            <h3>Бронирований пока нет</h3>
+                            <p>Будьте первыми, кто забронирует время для прака!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ******************************************************* -->
+        <!-- HISTORY -->
+        <!-- ******************************************************* -->
+        <section class="page-block" id="history">
+            <div class="history-container">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <div class="section-title-bg">ИСТОРИЯ</div>
+                        <h2 class="section-title">ИСТОРИЯ ИГР</h2>
+                    </div>
+                    <div class="section-subtitle">Все проведенные матчи и статистика команды</div>
+                    <div class="section-line"></div>
+                </div>
+
+                <!-- СТАТИСТИКА -->
+                <div class="history-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="total-games">0</div>
+                            <div class="stat-label">Всего игр</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="wins">0</div>
+                            <div class="stat-label">Побед</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="losses">0</div>
+                            <div class="stat-label">Поражений</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="win-rate">0%</div>
+                            <div class="stat-label">Винрейт</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ФИЛЬТРЫ -->
+                <div class="history-filters">
+                    <div class="filter-group">
+                        <label>
+                            <i class="fas fa-calendar"></i>
+                            Период:
+                        </label>
+                        <select class="filter-select" id="date-filter">
+                            <option value="all">Все время</option>
+                            <option value="week">За неделю</option>
+                            <option value="month">За месяц</option>
+                            <option value="year">За год</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>
+                            <i class="fas fa-flag"></i>
+                            Результат:
+                        </label>
+                        <select class="filter-select" id="result-filter">
+                            <option value="all">Все</option>
+                            <option value="win">Победы</option>
+                            <option value="loss">Поражения</option>
+                            <option value="draw">Ничьи</option>
+                        </select>
+                    </div>
+                    
+                    <button class="filter-btn" id="apply-filters">
+                        <i class="fas fa-filter"></i>
+                        Применить
+                    </button>
+                </div>
+
+                <!-- ТАБЛИЦА ИСТОРИИ -->
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-calendar"></i> Дата</th>
+                                <th><i class="fas fa-users"></i> Противник</th>
+                                <th><i class="fas fa-flag"></i> Результат</th>
+                                <th><i class="fas fa-user-friends"></i> Состав</th>
+                                <th><i class="fas fa-comment"></i> Комментарий</th>
+                            </tr>
+                        </thead>
+                        <tbody id="games-table-body">
+                            <!-- Данные будут загружены через JS -->
+                        </tbody>
+                    </table>
+                    
+                    <div id="no-games-message" class="no-games-message">
+                        <i class="fas fa-history"></i>
+                        <h3>Игр пока нет</h3>
+                        <p>Игры можно добавить через админ панель</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="image/logo.png" alt="logo">
+                <span>JavaTeam</span>
+            </div>
+            
+            <div class="footer-social">
+                <a href="https://t.me/JavaTeamGame" target="_blank" class="social-link">
+                    <i class="fab fa-telegram"></i>
+                </a>
+            </div>
+            
+            <div class="footer-copyright">
+                © 2023 JavaTeam. Все права защищены.
+            </div>
+            
+            <div class="footer-madeby">
+                Сделано с <i class="fas fa-heart"></i> для киберспорта
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script src="js/ui.js"></script>
+</body>
+</html>
