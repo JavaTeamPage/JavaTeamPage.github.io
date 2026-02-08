@@ -1,4 +1,4 @@
-// ui.js - ПОЛНАЯ ВЕРСИЯ СО СКРЫТОЙ АДМИНКОЙ
+// ui.js - АДМИНКА ТОЛЬКО ПО ПАРОЛЮ
 console.log('🎮 JAVATEAM UI Initializing...');
 
 // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
@@ -8,6 +8,7 @@ let bookings = [];
 let selectedTimeSlot = null;
 let adminClickCount = 0;
 let adminClickTimeout;
+let isAdminUnlocked = false;
 
 // ===== СКРЫТАЯ АДМИН-СИСТЕМА =====
 function initHiddenAdmin() {
@@ -27,7 +28,6 @@ function initHiddenAdmin() {
                 adminClickCount = 0;
             }, 2000);
             
-            // Если кликнули 3 раза - показываем поле для пароля
             if (adminClickCount === 3) {
                 showPasswordInput();
                 adminClickCount = 0;
@@ -37,11 +37,9 @@ function initHiddenAdmin() {
 }
 
 function showPasswordInput() {
-    // Удаляем старый инпут если есть
     const oldInput = document.querySelector('.admin-password-input');
     if (oldInput) oldInput.remove();
     
-    // Создаем инпут для пароля
     const passwordInput = document.createElement('div');
     passwordInput.className = 'admin-password-input';
     passwordInput.innerHTML = `
@@ -60,12 +58,10 @@ function showPasswordInput() {
     
     document.body.appendChild(passwordInput);
     
-    // Показываем анимацию
     setTimeout(() => {
         passwordInput.classList.add('show');
     }, 10);
     
-    // Обработчик ввода пароля
     const input = document.getElementById('admin-password');
     const submitBtn = document.getElementById('submit-password');
     
@@ -76,7 +72,6 @@ function showPasswordInput() {
         if (e.key === 'Enter') checkAdminPassword();
     });
     
-    // Закрытие при клике вне поля
     passwordInput.addEventListener('click', function(e) {
         if (e.target === passwordInput) {
             hidePasswordInput();
@@ -89,10 +84,12 @@ function checkAdminPassword() {
     const correctPassword = 'KirillBerezhansky';
     
     if (password === correctPassword) {
-        showNotification('✅ Доступ разрешен!', 'success');
+        isAdminUnlocked = true;
+        showNotification('✅ Доступ разрешен! Админка активирована', 'success');
         hidePasswordInput();
-        // Показываем админ-панель
-        showAdminPanel();
+        // СОЗДАЕМ админку только сейчас
+        createAdminPage();
+        addAdminButton();
         openPage('admin');
     } else {
         showNotification('❌ Неверный пароль!', 'error');
@@ -111,43 +108,45 @@ function hidePasswordInput() {
     }
 }
 
-// ===== ПОКАЗАТЬ АДМИН ПАНЕЛЬ =====
-function showAdminPanel() {
-    // Создаем кнопку админа если её нет
-    let adminBtn = document.querySelector('.admin-panel-btn');
+// ===== СОЗДАТЬ КНОПКУ АДМИНА =====
+function addAdminButton() {
+    if (!isAdminUnlocked) return; // Только если пароль введен
     
-    if (!adminBtn) {
-        const menu = document.querySelector('.menu');
-        if (menu) {
-            adminBtn = document.createElement('button');
-            adminBtn.className = 'menu-btn admin-panel-btn';
-            adminBtn.setAttribute('data-page', 'admin');
-            adminBtn.innerHTML = `
-                <div class="menu-icon">
-                    <i class="fas fa-user-shield"></i>
-                </div>
-                <span>АДМИН</span>
-            `;
-            menu.appendChild(adminBtn);
-            
-            adminBtn.addEventListener('click', function() {
-                openPage('admin');
-            });
-        }
+    const menu = document.querySelector('.menu');
+    if (!menu) return;
+    
+    // Проверяем, есть ли уже кнопка
+    const existingBtn = document.querySelector('.menu-btn[data-page="admin"]');
+    if (existingBtn) {
+        existingBtn.style.display = 'flex';
+        return;
     }
     
-    // Показываем кнопку
-    if (adminBtn) {
-        adminBtn.style.display = 'flex';
-    }
+    // Создаем новую кнопку
+    const adminBtn = document.createElement('button');
+    adminBtn.className = 'menu-btn';
+    adminBtn.setAttribute('data-page', 'admin');
+    adminBtn.innerHTML = `
+        <div class="menu-icon">
+            <i class="fas fa-user-shield"></i>
+        </div>
+        <span>АДМИН</span>
+    `;
     
-    // Создаем страницу админа если её нет
-    createAdminPage();
+    menu.appendChild(adminBtn);
+    
+    adminBtn.addEventListener('click', function() {
+        openPage('admin');
+    });
+    
+    // Переинициализируем меню
+    initMenu();
 }
 
 // ===== СОЗДАТЬ СТРАНИЦУ АДМИНА =====
 function createAdminPage() {
     if (document.getElementById('admin')) return;
+    if (!isAdminUnlocked) return; // Только для админа
     
     const adminHTML = `
     <section class="page-block" id="admin">
@@ -162,7 +161,6 @@ function createAdminPage() {
             </div>
 
             <div class="admin-panel">
-                <!-- СТАТИСТИКА -->
                 <div class="admin-section">
                     <h3><i class="fas fa-chart-bar"></i> СТАТИСТИКА</h3>
                     <div class="admin-stats">
@@ -181,7 +179,6 @@ function createAdminPage() {
                     </div>
                 </div>
 
-                <!-- СИНХРОНИЗАЦИЯ -->
                 <div class="admin-section">
                     <h3><i class="fas fa-sync-alt"></i> СИНХРОНИЗАЦИЯ</h3>
                     <div class="admin-actions">
@@ -196,7 +193,6 @@ function createAdminPage() {
                     </div>
                 </div>
 
-                <!-- УПРАВЛЕНИЕ -->
                 <div class="admin-section">
                     <h3><i class="fas fa-tools"></i> УПРАВЛЕНИЕ</h3>
                     <div class="admin-actions">
@@ -215,7 +211,6 @@ function createAdminPage() {
                     </div>
                 </div>
 
-                <!-- ЭКСПОРТ -->
                 <div class="admin-section">
                     <h3><i class="fas fa-download"></i> ЭКСПОРТ</h3>
                     <div class="admin-actions">
@@ -230,14 +225,11 @@ function createAdminPage() {
                     </div>
                 </div>
 
-                <!-- ИНФОРМАЦИЯ -->
                 <div class="admin-section">
                     <h3><i class="fas fa-info-circle"></i> ИНФОРМАЦИЯ</h3>
                     <div class="admin-info">
-                        <p><strong>Пароль админа:</strong> KirillBerezhansky</p>
                         <p><strong>Текущая проблема:</strong> Брони сохраняются только в localStorage браузера.</p>
                         <p><strong>Решение:</strong> Админ должен вручную синхронизировать данные.</p>
-                        <p><strong>Как открыть админку:</strong> Нажать 3 раза на логотип "JavaTeam" вверху</p>
                     </div>
                 </div>
             </div>
@@ -329,7 +321,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Загружаем данные
         await loadData();
         
-        // Добавляем CSS для админки
+        // Добавляем CSS
         addAdminStyles();
         
         console.log('✅ Все системы запущены');
@@ -383,6 +375,8 @@ async function loadData() {
 
 // ===== ОБНОВИТЬ СТАТИСТИКУ АДМИНА =====
 function updateAdminStats() {
+    if (!isAdminUnlocked) return; // Только для админа
+    
     const today = new Date().toISOString().split('T')[0];
     const todayBookings = bookings.filter(b => b.bookingDate === today);
     const adminTodayBookings = document.getElementById('admin-today-bookings');
@@ -412,6 +406,11 @@ function initMenu() {
 
 function openPage(pageId) {
     if (currentPage === pageId) return;
+    
+    if (pageId === 'admin' && !isAdminUnlocked) {
+        showNotification('Доступ запрещен! Введите пароль', 'error');
+        return;
+    }
     
     const currentBlock = document.querySelector('.page-block.active');
     const newBlock = document.getElementById(pageId);
@@ -882,22 +881,21 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-// ===== CSS ДЛЯ АДМИНКИ И УВЕДОМЛЕНИЙ =====
+// ===== CSS ДЛЯ АДМИНКИ =====
 function addAdminStyles() {
     const style = document.createElement('style');
     style.textContent = `
-        /* Скрытая админка */
         .admin-password-input {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            z-index: 10000;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -907,13 +905,13 @@ function addAdminStyles() {
         }
         
         .password-container {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            background: #1a1a2e;
             padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 10px;
             border: 2px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
             text-align: center;
-            min-width: 320px;
+            min-width: 300px;
         }
         
         .password-header {
@@ -921,51 +919,40 @@ function addAdminStyles() {
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
             font-family: 'Orbitron', sans-serif;
         }
         
         #admin-password {
             width: 100%;
-            padding: 12px 15px;
+            padding: 12px;
+            margin-bottom: 15px;
             background: rgba(255,255,255,0.1);
             border: 2px solid #0099ff;
-            border-radius: 6px;
+            border-radius: 5px;
             color: white;
             font-size: 16px;
-            margin-bottom: 15px;
             text-align: center;
-            transition: all 0.3s;
         }
         
         #admin-password:focus {
             outline: none;
             border-color: #00ff88;
-            box-shadow: 0 0 15px rgba(0,255,136,0.3);
         }
         
         #submit-password {
+            width: 100%;
+            padding: 12px;
             background: linear-gradient(90deg, #0099ff, #00ff88);
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 6px;
+            border-radius: 5px;
             font-weight: bold;
             cursor: pointer;
-            width: 100%;
             font-size: 16px;
-            transition: transform 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
         
         #submit-password:hover {
-            transform: scale(1.05);
+            opacity: 0.9;
         }
         
         .password-hint {
@@ -975,7 +962,6 @@ function addAdminStyles() {
             font-style: italic;
         }
         
-        /* Уведомления */
         .notification {
             position: fixed;
             top: 20px;
@@ -987,12 +973,11 @@ function addAdminStyles() {
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             transform: translateX(120%);
             transition: transform 0.3s ease;
-            z-index: 9998;
+            z-index: 9999;
             border-left: 4px solid #00ff88;
-            max-width: 400px;
         }
         
         .notification.show {
@@ -1011,34 +996,12 @@ function addAdminStyles() {
             border-left-color: #0099ff;
         }
         
-        .notification i {
-            font-size: 20px;
-        }
-        
-        .notification i.fa-check-circle {
-            color: #00ff88;
-        }
-        
-        .notification i.fa-exclamation-circle {
-            color: #ff4757;
-        }
-        
-        .notification i.fa-info-circle {
-            color: #0099ff;
-        }
-        
         .notification-close {
             background: none;
             border: none;
             color: white;
             cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-            margin-left: auto;
-        }
-        
-        .notification-close:hover {
-            opacity: 1;
+            margin-left: 10px;
         }
     `;
     document.head.appendChild(style);
