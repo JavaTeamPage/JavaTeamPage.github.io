@@ -1,4 +1,4 @@
-// ui.js - АДМИНКА ТОЛЬКО ПО ПАРОЛЮ
+// ui.js - ПОЛНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ
 console.log('🎮 JAVATEAM UI Initializing...');
 
 // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
@@ -6,310 +6,25 @@ let currentPage = 'info';
 let gamesHistory = [];
 let bookings = [];
 let selectedTimeSlot = null;
-let adminClickCount = 0;
-let adminClickTimeout;
-let isAdminUnlocked = false;
-
-// ===== СКРЫТАЯ АДМИН-СИСТЕМА =====
-function initHiddenAdmin() {
-    const logo = document.querySelector('.logo');
-    if (logo) {
-        logo.style.cursor = 'pointer';
-        
-        logo.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            adminClickCount++;
-            console.log(`👑 Admin click: ${adminClickCount}`);
-            
-            clearTimeout(adminClickTimeout);
-            adminClickTimeout = setTimeout(() => {
-                adminClickCount = 0;
-            }, 2000);
-            
-            if (adminClickCount === 3) {
-                showPasswordInput();
-                adminClickCount = 0;
-            }
-        });
-    }
-}
-
-function showPasswordInput() {
-    const oldInput = document.querySelector('.admin-password-input');
-    if (oldInput) oldInput.remove();
-    
-    const passwordInput = document.createElement('div');
-    passwordInput.className = 'admin-password-input';
-    passwordInput.innerHTML = `
-        <div class="password-container">
-            <div class="password-header">
-                <i class="fas fa-lock"></i>
-                <span>АДМИН ДОСТУП</span>
-            </div>
-            <input type="password" id="admin-password" placeholder="Введите пароль" autocomplete="off">
-            <button id="submit-password">
-                <i class="fas fa-key"></i> Войти
-            </button>
-            <div class="password-hint">Подсказка: Фамилия создателя</div>
-        </div>
-    `;
-    
-    document.body.appendChild(passwordInput);
-    
-    setTimeout(() => {
-        passwordInput.classList.add('show');
-    }, 10);
-    
-    const input = document.getElementById('admin-password');
-    const submitBtn = document.getElementById('submit-password');
-    
-    if (input) input.focus();
-    
-    if (submitBtn) submitBtn.addEventListener('click', checkAdminPassword);
-    if (input) {
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') checkAdminPassword();
-        });
-    }
-    
-    passwordInput.addEventListener('click', function(e) {
-        if (e.target === passwordInput) {
-            hidePasswordInput();
-        }
-    });
-}
-
-function checkAdminPassword() {
-    const input = document.getElementById('admin-password');
-    if (!input) return;
-    
-    const password = input.value;
-    const correctPassword = 'KirillBerezhansky';
-    
-    if (password === correctPassword) {
-        isAdminUnlocked = true;
-        showNotification('✅ Доступ разрешен! Админка активирована', 'success');
-        hidePasswordInput();
-        createAdminPage();
-        addAdminButton();
-        openPage('admin');
-    } else {
-        showNotification('❌ Неверный пароль!', 'error');
-        input.value = '';
-        input.focus();
-    }
-}
-
-function hidePasswordInput() {
-    const passwordInput = document.querySelector('.admin-password-input');
-    if (passwordInput) {
-        passwordInput.classList.remove('show');
-        setTimeout(() => {
-            passwordInput.remove();
-        }, 300);
-    }
-}
-
-// ===== СОЗДАТЬ КНОПКУ АДМИНА =====
-function addAdminButton() {
-    if (!isAdminUnlocked) return;
-    
-    const menu = document.querySelector('.menu');
-    if (!menu) return;
-    
-    const existingBtn = document.querySelector('.menu-btn[data-page="admin"]');
-    if (existingBtn) {
-        existingBtn.style.display = 'flex';
-        return;
-    }
-    
-    const adminBtn = document.createElement('button');
-    adminBtn.className = 'menu-btn';
-    adminBtn.setAttribute('data-page', 'admin');
-    adminBtn.innerHTML = `
-        <div class="menu-icon">
-            <i class="fas fa-user-shield"></i>
-        </div>
-        <span>АДМИН</span>
-    `;
-    
-    menu.appendChild(adminBtn);
-    
-    adminBtn.addEventListener('click', function() {
-        openPage('admin');
-    });
-    
-    initMenu();
-}
-
-// ===== СОЗДАТЬ СТРАНИЦУ АДМИНА =====
-function createAdminPage() {
-    if (document.getElementById('admin')) return;
-    if (!isAdminUnlocked) return;
-    
-    const adminHTML = `
-    <section class="page-block" id="admin">
-        <div class="admin-container">
-            <div class="section-header">
-                <div class="section-title-wrapper">
-                    <div class="section-title-bg">АДМИН</div>
-                    <h2 class="section-title">ПАНЕЛЬ УПРАВЛЕНИЯ</h2>
-                </div>
-                <div class="section-subtitle">Управление бронированиями и играми</div>
-                <div class="section-line"></div>
-            </div>
-
-            <div class="admin-panel">
-                <div class="admin-section">
-                    <h3><i class="fas fa-chart-bar"></i> СТАТИСТИКА</h3>
-                    <div class="admin-stats">
-                        <div class="admin-stat">
-                            <div class="stat-label">Сегодняшних броней</div>
-                            <div class="stat-value" id="admin-today-bookings">0</div>
-                        </div>
-                        <div class="admin-stat">
-                            <div class="stat-label">Всего игр</div>
-                            <div class="stat-value" id="admin-total-games">0</div>
-                        </div>
-                        <div class="admin-stat">
-                            <div class="stat-label">В localStorage</div>
-                            <div class="stat-value" id="admin-local-bookings">0</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="admin-section">
-                    <h3><i class="fas fa-sync-alt"></i> СИНХРОНИЗАЦИЯ</h3>
-                    <div class="admin-actions">
-                        <button class="admin-btn" id="sync-btn">
-                            <i class="fas fa-sync"></i>
-                            Синхронизировать брони
-                        </button>
-                        <button class="admin-btn" id="refresh-btn">
-                            <i class="fas fa-redo"></i>
-                            Обновить данные
-                        </button>
-                    </div>
-                </div>
-
-                <div class="admin-section">
-                    <h3><i class="fas fa-tools"></i> УПРАВЛЕНИЕ</h3>
-                    <div class="admin-actions">
-                        <button class="admin-btn" onclick="openPage('praki')">
-                            <i class="fas fa-plus"></i>
-                            Добавить бронь
-                        </button>
-                        <button class="admin-btn" onclick="openPage('history')">
-                            <i class="fas fa-gamepad"></i>
-                            К истории игр
-                        </button>
-                        <button class="admin-btn danger-btn" id="reset-btn">
-                            <i class="fas fa-trash"></i>
-                            Сбросить сегодня
-                        </button>
-                    </div>
-                </div>
-
-                <div class="admin-section">
-                    <h3><i class="fas fa-download"></i> ЭКСПОРТ</h3>
-                    <div class="admin-actions">
-                        <button class="admin-btn" id="export-btn">
-                            <i class="fas fa-file-export"></i>
-                            Экспорт данных
-                        </button>
-                        <button class="admin-btn" id="view-local-btn">
-                            <i class="fas fa-database"></i>
-                            Просмотр localStorage
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>`;
-    
-    const pageContent = document.querySelector('.page-content');
-    if (pageContent) {
-        pageContent.insertAdjacentHTML('beforeend', adminHTML);
-        setTimeout(initAdminButtons, 100);
-    }
-}
-
-// ===== ИНИЦИАЛИЗАЦИЯ КНОПОК АДМИНА =====
-function initAdminButtons() {
-    const syncBtn = document.getElementById('sync-btn');
-    if (syncBtn) {
-        syncBtn.addEventListener('click', async () => {
-            const result = await db.syncLocalWithGitHub();
-            showNotification(result.message, 'success');
-        });
-    }
-    
-    const refreshBtn = document.getElementById('refresh-btn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', async () => {
-            await loadData();
-            showNotification('Данные обновлены', 'success');
-        });
-    }
-    
-    const resetBtn = document.getElementById('reset-btn');
-    if (resetBtn) {
-        resetBtn.addEventListener('click', async () => {
-            if (confirm('⚠️ Сбросить ВСЕ сегодняшние брони?\n\nЭто действие нельзя отменить!')) {
-                const result = await db.adminResetBookings();
-                if (result.success) {
-                    await loadData();
-                    showNotification('Сегодняшние брони сброшены', 'success');
-                }
-            }
-        });
-    }
-    
-    const exportBtn = document.getElementById('export-btn');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', async () => {
-            await db.adminExportData();
-            showNotification('Данные экспортированы', 'success');
-        });
-    }
-    
-    const viewLocalBtn = document.getElementById('view-local-btn');
-    if (viewLocalBtn) {
-        viewLocalBtn.addEventListener('click', () => {
-            const localBookings = db.getFromLocalStorage();
-            const today = new Date().toISOString().split('T')[0];
-            
-            let message = `📋 Брони в localStorage (${today}):\n\n`;
-            
-            if (localBookings.length === 0) {
-                message += 'Нет броней в localStorage';
-            } else {
-                localBookings.forEach((b, i) => {
-                    message += `${i+1}. ${b.teamName} - ${b.time} (ID: ${b.id})\n`;
-                });
-                message += `\nВсего: ${localBookings.length} броней`;
-            }
-            
-            alert(message);
-        });
-    }
-}
+let selectedMaps = [];
 
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 JAVATEAM Website Started');
     
     try {
-        initHiddenAdmin();
+        // Проверяем подключение к Gist
+        await checkGistConnection();
+        
+        // Инициализация
         initMenu();
         initPrakiBookingSystem();
         initOtherElements();
         initHistory();
+        initAdminPanel();
         
+        // Загружаем данные
         await loadData();
-        addAdminStyles();
         
         console.log('✅ Все системы запущены');
         
@@ -319,36 +34,56 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
+// ===== ПРОВЕРКА ПОДКЛЮЧЕНИЯ К GIST =====
+async function checkGistConnection() {
+    console.log('🔍 Проверка подключения к Gist...');
+    
+    try {
+        const data = await db._fetchGistData();
+        console.log('✅ Gist подключен:', Object.keys(data));
+        
+        // Проверяем токен
+        if (!db.GITHUB_TOKEN || db.GITHUB_TOKEN.includes('ВАШ_ТОКЕН')) {
+            console.warn('⚠️ GitHub Token не настроен! Брони не будут сохраняться для всех.');
+            
+            // Показываем предупреждение только в админ-панели
+            setTimeout(() => {
+                if (window.location.hash === '#admin' || currentPage === 'admin') {
+                    showNotification('ВНИМАНИЕ АДМИНУ: Установите GitHub Token в github-db.js!', 'error', 10000);
+                }
+            }, 1000);
+        }
+    } catch (error) {
+        console.warn('⚠️ Gist недоступен, используем локальный режим');
+        showNotification('Режим локальных данных. Брони не видны другим пользователям.', 'warning', 5000);
+    }
+}
+
 // ===== ЗАГРУЗКА ДАННЫХ =====
 async function loadData() {
     console.log('📥 Loading data...');
+    showNotification('Загрузка данных...', 'info');
     
     try {
+        // Загружаем брони с Gist
         bookings = await db.getBookings();
-        console.log('📅 Bookings from GitHub:', bookings);
+        console.log('📅 Bookings from DB:', bookings.length);
         
-        const localBookings = db.getFromLocalStorage();
-        console.log('💾 Local bookings:', localBookings);
-        
-        const allBookings = [...bookings];
-        localBookings.forEach(local => {
-            if (!allBookings.some(g => g.id === local.id)) {
-                allBookings.push({...local, isLocal: true});
-            }
-        });
-        
-        bookings = allBookings;
-        console.log('📊 All bookings after merge:', bookings);
-        
+        // Обновляем отображение
         updateBookingsDisplay();
         updateTimeSlotsFromBookings();
         
+        // Загружаем историю игр
         gamesHistory = await db.getGames();
-        console.log('🎮 Games history:', gamesHistory);
+        console.log('🎮 Games history:', gamesHistory.length);
         renderGamesTable();
         updateStats();
         updateInfoStats();
         
+        // Загружаем состав команды
+        loadTeamMembers();
+        
+        // Обновляем админ статистику
         updateAdminStats();
         
         showNotification('✅ Данные загружены!', 'success');
@@ -356,28 +91,168 @@ async function loadData() {
     } catch (error) {
         console.error('❌ Ошибка загрузки данных:', error);
         showNotification('Ошибка загрузки данных', 'error');
-        
         updateBookingsDisplay();
         renderGamesTable();
     }
 }
 
-// ===== ОБНОВИТЬ СТАТИСТИКУ АДМИНА =====
-function updateAdminStats() {
-    if (!isAdminUnlocked) return;
+// ===== ЗАГРУЗКА СОСТАВА КОМАНДЫ =====
+function loadTeamMembers() {
+    // Основной состав
+    const mainGrid = document.querySelector('.members-category:first-child .members-grid');
+    const supportGrid = document.querySelector('.members-category:last-child .members-grid');
     
-    const today = new Date().toISOString().split('T')[0];
-    const todayBookings = bookings.filter(b => b.bookingDate === today);
+    if (!mainGrid || !supportGrid) return;
     
-    const adminTodayBookings = document.getElementById('admin-today-bookings');
-    if (adminTodayBookings) adminTodayBookings.textContent = todayBookings.length;
+    // Основной состав
+    const mainPlayers = [
+        {
+            name: 'V3k',
+            role: 'КАПИТАН',
+            icon: 'crown',
+            kd: '1.84',
+            hs: '50%',
+            hours: '378',
+            desc: 'Стратег команды, отвечает за тактические построения и контроль темпа игры.',
+            skills: ['Стратегия', 'IGL', 'AWP'],
+            img: 'player1.png'
+        },
+        {
+            name: 'Paradox',
+            role: 'ЛЮРКЕР',
+            icon: 'user-ninja',
+            kd: '1.27',
+            hs: '50.2%',
+            hours: '850',
+            desc: 'Мастер скрытных перемещений и неожиданных атак со спины противника.',
+            skills: ['Фланги', 'Скрытность', 'Клинер'],
+            img: 'player2.png'
+        },
+        {
+            name: 'Maybe?',
+            role: 'СНАЙПЕР',
+            icon: 'crosshairs',
+            kd: '1.84',
+            hs: '53.3%',
+            hours: '1363',
+            desc: 'Снайпер с невероятной точностью. Может выиграть раунд одним удачным выстрелом.',
+            skills: ['AWP', 'Хедшоты', 'Опенер'],
+            img: 'player3.png'
+        },
+        {
+            name: 'Eclipse',
+            role: 'РИФЛЕР',
+            icon: 'bomb',
+            kd: '1.84',
+            hs: '53.5%',
+            hours: '565',
+            desc: 'Агрессивный рифлер, специалист по входам на сайты и созданию пространства для команды.',
+            skills: ['Энтри', 'Агрессия', 'Трейд'],
+            img: 'player4.png'
+        },
+        {
+            name: 'k3llmy',
+            role: 'ОПЕНФРАГЕР',
+            icon: 'running',
+            kd: '1.38',
+            hs: '41.7%',
+            hours: '543',
+            desc: 'Быстрый и мобильный игрок, специализируется на открытии фрагов и разведке.',
+            skills: ['Скорость', 'Разведка', 'Патруль'],
+            img: 'player5.png'
+        }
+    ];
     
-    const adminTotalGames = document.getElementById('admin-total-games');
-    if (adminTotalGames) adminTotalGames.textContent = gamesHistory.length;
+    // Тренер и рекрут
+    const supportPlayers = [
+        {
+            name: 'Pastic',
+            role: 'ТРЕНЕР',
+            icon: 'chalkboard-teacher',
+            kd: '7+',
+            hs: '50+',
+            hours: '100%',
+            desc: 'Опытный тренер с глубоким пониманием игры. Отвечает за тактическую подготовку и анализ соперников.',
+            skills: ['Тактика', 'Анализ', 'Психология'],
+            img: 'player1.png',
+            isCoach: true
+        },
+        {
+            name: 'blast',
+            role: 'РЕКРУТ',
+            icon: 'seedling',
+            kd: '1.56',
+            hs: '54.4%',
+            hours: '505',
+            desc: 'Перспективный игрок с большим потенциалом. Проходит адаптацию к командной игре.',
+            skills: ['Потенциал', 'Адаптация', 'Мотивация'],
+            img: 'player6.png',
+            isRecruit: true
+        }
+    ];
     
-    const localBookings = db.getFromLocalStorage();
-    const adminLocalBookings = document.getElementById('admin-local-bookings');
-    if (adminLocalBookings) adminLocalBookings.textContent = localBookings.length;
+    // Очищаем сетки
+    mainGrid.innerHTML = '';
+    supportGrid.innerHTML = '';
+    
+    // Добавляем основной состав
+    mainPlayers.forEach(player => {
+        mainGrid.innerHTML += createMemberCard(player);
+    });
+    
+    // Добавляем поддержку
+    supportPlayers.forEach(player => {
+        supportGrid.innerHTML += createMemberCard(player);
+    });
+    
+    // Инициализируем карточки
+    initMemberCards();
+}
+
+function createMemberCard(player) {
+    const rankClass = player.isCoach ? 'coach-card' : player.isRecruit ? 'recruit-card' : '';
+    const rankText = player.isCoach ? 'ТРЕНЕР' : player.isRecruit ? 'РЕКРУТ' : player.role;
+    
+    return `
+        <div class="member-card ${rankClass}" data-player="${player.name.toLowerCase()}">
+            <div class="member-card-inner">
+                <div class="member-image">
+                    <img src="image/${player.img}" alt="${player.name}" onerror="this.src='image/default-player.jpg'">
+                    <div class="member-rank">${rankText}</div>
+                </div>
+                <div class="member-info">
+                    <div class="member-header">
+                        <div class="member-name">${player.name}</div>
+                        <div class="member-role">
+                            <i class="fas fa-${player.icon}"></i>
+                            ${player.role}
+                        </div>
+                    </div>
+                    
+                    <div class="member-stats">
+                        <div class="stat">
+                            <div class="stat-value">${player.kd}</div>
+                            <div class="stat-label">${player.role === 'ТРЕНЕР' ? 'Лет опыта' : 'K/D'}</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${player.hs}</div>
+                            <div class="stat-label">${player.role === 'ТРЕНЕР' ? 'Лучших тактик' : player.role === 'РЕКРУТ' ? 'Хедшоты' : 'Хедшоты'}</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${player.hours}</div>
+                            <div class="stat-label">${player.role === 'ТРЕНЕР' ? 'Понимание' : 'hour'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="member-desc">${player.desc}</div>
+                    
+                    <div class="member-skills">
+                        ${player.skills.map(skill => `<span class="skill">${skill}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // ===== МЕНЮ И ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ =====
@@ -392,15 +267,18 @@ function initMenu() {
             openPage(pageId);
         });
     });
+    
+    const logo = document.querySelector('.logo');
+    if (logo) {
+        logo.addEventListener('click', function(e) {
+            e.preventDefault();
+            openPage('info');
+        });
+    }
 }
 
 function openPage(pageId) {
     if (currentPage === pageId) return;
-    
-    if (pageId === 'admin' && !isAdminUnlocked) {
-        showNotification('Доступ запрещен! Введите пароль', 'error');
-        return;
-    }
     
     const currentBlock = document.querySelector('.page-block.active');
     const newBlock = document.getElementById(pageId);
@@ -418,8 +296,8 @@ function openPage(pageId) {
             
             if (pageId === 'info') updateInfoStats();
             if (pageId === 'praki') updateBookingsDisplay();
-            if (pageId === 'history') updateStats();
             if (pageId === 'admin') updateAdminStats();
+            if (pageId === 'members') loadTeamMembers();
             
         }, 300);
     }
@@ -462,19 +340,24 @@ function updateActiveMenuButton(pageId) {
 
 // ===== БРОНИРОВАНИЕ =====
 function initPrakiBookingSystem() {
+    // Карты
     document.querySelectorAll('.map-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             this.classList.toggle('active');
             this.style.transform = 'scale(0.95)';
             setTimeout(() => this.style.transform = '', 150);
+            
+            // Сохраняем выбранные карты
+            selectedMaps = Array.from(document.querySelectorAll('.map-btn.active'))
+                .map(btn => btn.querySelector('span').textContent);
         });
     });
     
+    // Временные слоты
     document.querySelectorAll('.time-slot').forEach(slot => {
         slot.addEventListener('click', function() {
             const time = this.getAttribute('data-time');
-            const statusElement = this.querySelector('.time-status');
-            const isBooked = statusElement && statusElement.classList.contains('booked');
+            const isBooked = this.querySelector('.time-status').classList.contains('booked');
             
             if (isBooked) {
                 showNotification(`Время ${time} уже занято!`, 'error');
@@ -497,13 +380,14 @@ function initPrakiBookingSystem() {
         });
     });
     
+    // Кнопка отправки
     const submitBtn = document.querySelector('.praki-submit-btn');
     if (submitBtn) {
-        submitBtn.addEventListener('click', function(e) {
+        submitBtn.addEventListener('click', async function(e) {
             e.preventDefault();
             if (validatePrakiBookingForm()) {
                 this.style.transform = 'scale(0.95)';
-                createBooking();
+                await createBooking();
                 setTimeout(() => this.style.transform = '', 500);
             }
         });
@@ -540,16 +424,11 @@ function validatePrakiBookingForm() {
 async function createBooking() {
     const teamName = document.getElementById('team-name').value.trim();
     const captainName = document.getElementById('captain-name').value.trim();
-    const teamRosterInput = document.getElementById('team-roster');
-    const teamRoster = teamRosterInput ? teamRosterInput.value.trim().split(',').map(p => p.trim()) : [];
-    const commentInput = document.getElementById('comment');
-    const comment = commentInput ? commentInput.value.trim() : '';
+    const teamRoster = document.getElementById('team-roster').value.trim();
+    const comment = document.getElementById('comment').value.trim();
     
-    const selectedMaps = [];
-    document.querySelectorAll('.map-btn.active').forEach(btn => {
-        const span = btn.querySelector('span');
-        if (span) selectedMaps.push(span.textContent);
-    });
+    const selectedMaps = Array.from(document.querySelectorAll('.map-btn.active'))
+        .map(btn => btn.querySelector('span').textContent);
     
     const booking = {
         time: selectedTimeSlot,
@@ -561,15 +440,27 @@ async function createBooking() {
     };
     
     try {
+        console.log('Создание брони:', booking);
         const result = await db.addBooking(booking);
         
+        // Добавляем в локальный список
         bookings.push(result);
+        
+        // Обновляем отображение
         updateBookingsDisplay();
         updateTimeSlotStatus(selectedTimeSlot, 'booked', teamName);
+        
+        // Обновляем админ статистику
         updateAdminStats();
+        
+        // Сбрасываем форму
         resetPrakiForm();
         
+        // Перезагружаем данные
+        setTimeout(() => loadData(), 1000);
+        
     } catch (error) {
+        console.error('Ошибка создания брони:', error);
         showNotification(error.message, 'error');
     }
 }
@@ -585,6 +476,7 @@ function resetPrakiForm() {
     });
     
     selectedTimeSlot = null;
+    selectedMaps = [];
     document.querySelectorAll('.time-slot').forEach(slot => {
         slot.classList.remove('selected');
         const timeIcon = slot.querySelector('.time-icon');
@@ -603,6 +495,7 @@ function updateTimeSlotStatus(time, status, teamName = '') {
                 statusElement.textContent = `Занято: ${teamName}`;
                 timeElement.style.opacity = '0.7';
                 timeElement.style.cursor = 'not-allowed';
+                timeElement.classList.remove('selected');
             } else {
                 statusElement.textContent = 'Свободно';
                 timeElement.style.opacity = '1';
@@ -613,82 +506,55 @@ function updateTimeSlotStatus(time, status, teamName = '') {
 }
 
 function updateTimeSlotsFromBookings() {
+    // Сбрасываем все слоты
     document.querySelectorAll('.time-slot').forEach(slot => {
         const time = slot.getAttribute('data-time');
         updateTimeSlotStatus(time, 'available');
     });
     
-    const today = new Date().toISOString().split('T')[0];
+    // Помечаем занятые слоты
     bookings.forEach(booking => {
-        if (booking.bookingDate === today) {
-            updateTimeSlotStatus(booking.time, 'booked', booking.teamName);
-        }
+        updateTimeSlotStatus(booking.time, 'booked', booking.teamName);
     });
 }
 
-// ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ ОТОБРАЖЕНИЯ БРОНЕЙ =====
 function updateBookingsDisplay() {
-    console.log('🔄 Обновление таблицы бронирований...');
-    
     const tbody = document.getElementById('bookings-table-body');
     const noBookingsMessage = document.getElementById('no-bookings-message');
     
-    if (!tbody) {
-        console.error('❌ Не найден элемент bookings-table-body');
-        return;
-    }
-    
+    if (!tbody) return;
     tbody.innerHTML = '';
     
     const today = new Date().toISOString().split('T')[0];
-    console.log('📅 Сегодняшняя дата:', today);
-    console.log('📊 Все брони:', bookings);
-    
-    const todayBookings = bookings.filter(b => {
-        const bookingDate = b.bookingDate || b.date;
-        return bookingDate === today;
-    });
-    
-    console.log('✅ Брони на сегодня:', todayBookings);
+    const todayBookings = bookings.filter(b => b.bookingDate === today);
     
     if (todayBookings.length === 0) {
-        console.log('📭 Нет броней на сегодня');
-        if (noBookingsMessage) {
-            noBookingsMessage.style.display = 'block';
-        }
+        if (noBookingsMessage) noBookingsMessage.style.display = 'block';
         return;
     }
     
-    if (noBookingsMessage) {
-        noBookingsMessage.style.display = 'none';
-    }
+    if (noBookingsMessage) noBookingsMessage.style.display = 'none';
     
+    // Сортируем по времени
     const sortedBookings = todayBookings.sort((a, b) => {
-        const timeA = a.time ? parseInt(a.time.split(':')[0]) : 0;
-        const timeB = b.time ? parseInt(b.time.split(':')[0]) : 0;
-        return timeA - timeB;
+        return parseInt(a.time.split(':')[0]) - parseInt(b.time.split(':')[0]);
     });
     
     sortedBookings.forEach(booking => {
         const row = document.createElement('tr');
-        
-        const bookingDate = booking.bookingDate || booking.date;
-        const formattedDate = bookingDate ? new Date(bookingDate).toLocaleDateString('ru-RU') : 'Сегодня';
-        const isLocal = booking.isLocal ? ' ⚠️ (локально)' : '';
+        const formattedDate = new Date(booking.bookingDate).toLocaleDateString('ru-RU');
         
         row.innerHTML = `
-            <td><strong class="booking-time">${booking.time || '18:00'}</strong></td>
-            <td><strong>${booking.teamName || 'Неизвестно'}${isLocal}</strong></td>
-            <td>${booking.captainName || 'Неизвестно'}</td>
-            <td>${Array.isArray(booking.teamRoster) ? booking.teamRoster.join(', ') : (booking.teamRoster || 'Не указан')}</td>
-            <td>${Array.isArray(booking.maps) ? booking.maps.join(', ') : (booking.maps || 'Не указаны')}</td>
+            <td><strong class="booking-time">${booking.time}</strong></td>
+            <td><strong>${booking.teamName}</strong></td>
+            <td>${booking.captainName}</td>
+            <td>${Array.isArray(booking.teamRoster) ? booking.teamRoster.join(', ') : booking.teamRoster}</td>
+            <td>${Array.isArray(booking.maps) ? booking.maps.join(', ') : booking.maps}</td>
             <td>${formattedDate}</td>
         `;
         
         tbody.appendChild(row);
     });
-    
-    console.log('✅ Таблица бронирований обновлена');
 }
 
 // ===== ИСТОРИЯ ИГР =====
@@ -723,7 +589,7 @@ function renderGamesTable() {
         row.innerHTML = `
             <td>${formattedDate}</td>
             <td><strong>${game.opponent}</strong></td>
-            <td class="${resultClass}">${resultText} ${game.score ? `(${game.score})` : ''}</td>
+            <td class="${resultClass}">${resultText} (${game.score || ''})</td>
             <td>${Array.isArray(game.team) ? game.team.join(', ') : game.team}</td>
             <td>${game.comment || '-'}</td>
         `;
@@ -830,7 +696,7 @@ function filterGames() {
         row.innerHTML = `
             <td>${formattedDate}</td>
             <td><strong>${game.opponent}</strong></td>
-            <td class="${resultClass}">${resultText} ${game.score ? `(${game.score})` : ''}</td>
+            <td class="${resultClass}">${resultText} (${game.score || ''})</td>
             <td>${Array.isArray(game.team) ? game.team.join(', ') : game.team}</td>
             <td>${game.comment || '-'}</td>
         `;
@@ -839,8 +705,119 @@ function filterGames() {
     });
 }
 
+// ===== АДМИН ПАНЕЛЬ =====
+function initAdminPanel() {
+    // Синхронизация
+    const syncBtn = document.getElementById('sync-btn');
+    if (syncBtn) {
+        syncBtn.addEventListener('click', async () => {
+            showNotification('Синхронизация...', 'info');
+            const result = await db.syncLocalWithGitHub();
+            showNotification(result.message, 'success');
+            await loadData();
+        });
+    }
+    
+    // Обновить данные
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', async () => {
+            await loadData();
+            showNotification('Данные обновлены', 'success');
+        });
+    }
+    
+    // Проверить токен
+    const checkTokenBtn = document.getElementById('check-token-btn');
+    if (checkTokenBtn) {
+        checkTokenBtn.addEventListener('click', async () => {
+            if (!db.GITHUB_TOKEN || db.GITHUB_TOKEN.includes('ВАШ_ТОКЕН')) {
+                showNotification('Токен не настроен!', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://api.github.com/gists/${db.GIST_ID}`, {
+                    headers: {
+                        'Authorization': `token ${db.GITHUB_TOKEN}`
+                    }
+                });
+                
+                if (response.ok) {
+                    showNotification('✅ Токен работает!', 'success');
+                } else {
+                    showNotification('❌ Токен недействителен', 'error');
+                }
+            } catch (error) {
+                showNotification('Ошибка проверки токена', 'error');
+            }
+        });
+    }
+    
+    // Сбросить сегодня
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', async () => {
+            const result = await db.adminResetBookings();
+            if (result.success) {
+                await loadData();
+                showNotification('Сегодняшние брони сброшены', 'success');
+            }
+        });
+    }
+    
+    // Экспорт
+    const exportBtn = document.getElementById('export-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async () => {
+            await db.adminExportData();
+            showNotification('Данные экспортированы', 'success');
+        });
+    }
+    
+    // Просмотр localStorage
+    const viewLocalBtn = document.getElementById('view-local-btn');
+    if (viewLocalBtn) {
+        viewLocalBtn.addEventListener('click', () => {
+            const localBookings = db.getFromLocalStorage();
+            const today = new Date().toISOString().split('T')[0];
+            
+            let message = `📋 Брони в localStorage (${today}):\n\n`;
+            
+            if (localBookings.length === 0) {
+                message += 'Нет броней в localStorage';
+            } else {
+                localBookings.forEach((b, i) => {
+                    message += `${i+1}. ${b.teamName} - ${b.time} (ID: ${b.id})\n`;
+                });
+                message += `\nВсего: ${localBookings.length} броней`;
+            }
+            
+            alert(message);
+        });
+    }
+}
+
+function updateAdminStats() {
+    // Сегодняшние брони
+    const today = new Date().toISOString().split('T')[0];
+    const todayBookings = bookings.filter(b => b.bookingDate === today);
+    const adminTodayBookings = document.getElementById('admin-today-bookings');
+    if (adminTodayBookings) adminTodayBookings.textContent = todayBookings.length;
+    
+    // Всего игр
+    const adminTotalGames = document.getElementById('admin-total-games');
+    if (adminTotalGames) adminTotalGames.textContent = gamesHistory.length;
+    
+    // LocalStorage
+    const localBookings = db.getFromLocalStorage ? db.getFromLocalStorage() : [];
+    const adminLocalBookings = document.getElementById('admin-local-bookings');
+    if (adminLocalBookings) adminLocalBookings.textContent = localBookings.length;
+}
+
 // ===== ИНИЦИАЛИЗАЦИЯ ДРУГИХ ЭЛЕМЕНТОВ =====
 function initOtherElements() {
+    // Кнопка присоединения на главной
     const joinBtn = document.querySelector('.info-join-btn');
     if (joinBtn) {
         joinBtn.addEventListener('click', function() {
@@ -848,6 +825,7 @@ function initOtherElements() {
         });
     }
     
+    // Статистика членов команды
     initMemberCards();
 }
 
@@ -872,10 +850,14 @@ function initMemberCards() {
 }
 
 // ===== УВЕДОМЛЕНИЯ =====
-function showNotification(message, type = 'info') {
+function showNotification(message, type = 'info', duration = 5000) {
+    // Удаляем старые уведомления
     const oldNotification = document.querySelector('.notification');
-    if (oldNotification) oldNotification.remove();
+    if (oldNotification) {
+        oldNotification.remove();
+    }
     
+    // Создаем новое уведомление
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.innerHTML = `
@@ -886,121 +868,51 @@ function showNotification(message, type = 'info') {
     
     document.body.appendChild(notification);
     
-    setTimeout(() => notification.classList.add('show'), 10);
+    // Анимация появления
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
     
-    const closeBtn = notification.querySelector('.notification-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            notification.classList.remove('show');
-            setTimeout(() => notification.remove(), 300);
-        });
-    }
+    // Кнопка закрытия
+    notification.querySelector('.notification-close').addEventListener('click', function() {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    });
     
+    // Автоматическое закрытие
     setTimeout(() => {
         if (notification.parentNode) {
             notification.classList.remove('show');
             setTimeout(() => notification.remove(), 300);
         }
-    }, 5000);
+    }, duration);
 }
 
-// ===== CSS ДЛЯ АДМИНКИ =====
-function addAdminStyles() {
+// ===== CSS для уведомлений =====
+function addNotificationStyles() {
+    if (document.querySelector('style[data-notifications]')) return;
+    
     const style = document.createElement('style');
+    style.setAttribute('data-notifications', 'true');
     style.textContent = `
-        .admin-password-input {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .admin-password-input.show {
-            opacity: 1;
-        }
-        
-        .password-container {
-            background: #1a1a2e;
-            padding: 30px;
-            border-radius: 10px;
-            border: 2px solid #ffd700;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-            text-align: center;
-            min-width: 300px;
-        }
-        
-        .password-header {
-            color: #ffd700;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            font-family: 'Orbitron', sans-serif;
-        }
-        
-        #admin-password {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            background: rgba(255,255,255,0.1);
-            border: 2px solid #0099ff;
-            border-radius: 5px;
-            color: white;
-            font-size: 16px;
-            text-align: center;
-        }
-        
-        #admin-password:focus {
-            outline: none;
-            border-color: #00ff88;
-        }
-        
-        #submit-password {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(90deg, #0099ff, #00ff88);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        
-        #submit-password:hover {
-            opacity: 0.9;
-        }
-        
-        .password-hint {
-            margin-top: 15px;
-            color: #888;
-            font-size: 12px;
-            font-style: italic;
-        }
-        
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #1a1a2e;
+            background: #0a0a0a;
             color: white;
             padding: 15px 20px;
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             transform: translateX(120%);
             transition: transform 0.3s ease;
-            z-index: 9999;
+            z-index: 1000;
             border-left: 4px solid #00ff88;
+            max-width: 400px;
+            font-family: 'Exo 2', sans-serif;
         }
         
         .notification.show {
@@ -1019,15 +931,32 @@ function addAdminStyles() {
             border-left-color: #0099ff;
         }
         
+        .notification.warning {
+            border-left-color: #ffd700;
+        }
+        
+        .notification i {
+            font-size: 18px;
+        }
+        
         .notification-close {
             background: none;
             border: none;
             color: white;
             cursor: pointer;
-            margin-left: 10px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            margin-left: auto;
+        }
+        
+        .notification-close:hover {
+            opacity: 1;
         }
     `;
     document.head.appendChild(style);
 }
+
+// Добавляем стили при загрузке
+addNotificationStyles();
 
 console.log('✅ JAVATEAM UI Ready!');
