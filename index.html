@@ -17,6 +17,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Config -->
+    <script src="js/config.js"></script>
 </head>
 <body>
 
@@ -162,7 +165,7 @@
                             <div class="stat-label">ПОБЕД</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-number" id="info-members-count">21</div>
+                            <div class="stat-number" id="info-members-count">5</div>
                             <div class="stat-label">ИГРОКОВ В КОМАНДЕ</div>
                         </div>
                     </div>
@@ -194,7 +197,7 @@
                         <div class="category-badge">5 игроков</div>
                     </div>
                     
-                    <div class="members-grid">
+                    <div class="members-grid" id="main-members-grid">
                         <!-- Игроки будут загружены через JS -->
                     </div>
                 </div>
@@ -205,12 +208,12 @@
                         <div class="category-icon">
                             <i class="fas fa-user-tie"></i>
                         </div>
-                        <h3>ПОДДЕРЖКА</h3>
-                        <div class="category-badge">2 человека</div>
+                        <h3>АКАДЕМИЯ</h3>
+                        <div class="category-badge">5 игроков</div>
                     </div>
                     
-                    <div class="members-grid">
-                        <!-- Поддержка будет загружена через JS -->
+                    <div class="members-grid" id="academy-members-grid">
+                        <!-- Академия будет загружена через JS -->
                     </div>
                 </div>
             </div>
@@ -228,6 +231,12 @@
                     </div>
                     <div class="section-subtitle">Забронируйте время для тренировочного матча с нашей командой</div>
                     <div class="section-line"></div>
+                </div>
+
+                <!-- ТЕКУЩЕЕ ВРЕМЯ ИНДИКАТОР -->
+                <div id="current-time-indicator" class="current-time-indicator">
+                    <i class="fas fa-clock"></i>
+                    <span>Загрузка времени...</span>
                 </div>
 
                 <!-- ФОРМА БРОНИРОВАНИЯ -->
@@ -255,6 +264,7 @@
                                 Состав команды (через запятую)
                             </div>
                             <input type="text" class="form-input" id="team-roster" placeholder="Например: Player1, Player2, Player3, Player4, Player5" required>
+                            <div class="form-hint">Минимум 5 игроков, максимум 10</div>
                         </div>
                         
                         <div class="praki-field">
@@ -287,13 +297,14 @@
                                     <div class="time-status available" id="status-20">Свободно</div>
                                 </button>
                             </div>
+                            <div class="form-hint">Доступны только эти слоты. Время обновляется ежедневно в 00:00</div>
                         </div>
                         
                         <!-- ВЫБОР КАРТ STANDOFF 2 -->
                         <div class="praki-maps-section">
                             <div class="maps-title">
                                 <i class="fas fa-map"></i>
-                                ВЫБЕРИТЕ КАРТЫ STANDOFF 2 (минимум 1)
+                                ВЫБЕРИТЕ КАРТЫ STANDOFF 2 (минимум 1, максимум 3)
                             </div>
                             
                             <div class="praki-maps">
@@ -367,7 +378,10 @@
                         
                         <div class="booking-info">
                             <i class="fas fa-info-circle"></i>
-                            <p>Время сбрасывается каждый день в 00:00. Доступны только слоты 18:00, 19:00, 20:00.</p>
+                            <p>
+                                <strong>Важно:</strong> Бронирование создается в вашем браузере. Для синхронизации с другими пользователями админ должен нажать "Синхронизировать брони" в админ-панели.<br>
+                                <strong>ID брони:</strong> После создания брони скопируйте ID из уведомления и отправьте админу.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -499,6 +513,11 @@
                         <i class="fas fa-filter"></i>
                         Применить
                     </button>
+                    
+                    <button class="filter-btn" id="add-game-btn">
+                        <i class="fas fa-plus"></i>
+                        Добавить игру
+                    </button>
                 </div>
 
                 <!-- ТАБЛИЦА ИСТОРИИ -->
@@ -558,6 +577,10 @@
                                 <div class="stat-label">В localStorage</div>
                                 <div class="stat-value" id="admin-local-bookings">0</div>
                             </div>
+                            <div class="admin-stat">
+                                <div class="stat-label">Всего игроков</div>
+                                <div class="stat-value" id="admin-total-members">10</div>
+                            </div>
                         </div>
                     </div>
 
@@ -577,6 +600,10 @@
                                 <i class="fas fa-key"></i>
                                 Проверить токен
                             </button>
+                            <button class="admin-btn" id="check-gist-btn">
+                                <i class="fas fa-database"></i>
+                                Проверить Gist
+                            </button>
                         </div>
                     </div>
 
@@ -584,17 +611,21 @@
                     <div class="admin-section">
                         <h3><i class="fas fa-tools"></i> УПРАВЛЕНИЕ</h3>
                         <div class="admin-actions">
-                            <button class="admin-btn" onclick="openPage('praki')">
+                            <button class="admin-btn" id="go-to-praki-btn">
                                 <i class="fas fa-plus"></i>
                                 Добавить бронь
                             </button>
-                            <button class="admin-btn" onclick="openPage('history')">
+                            <button class="admin-btn" id="add-game-admin-btn">
                                 <i class="fas fa-gamepad"></i>
-                                К истории игр
+                                Добавить игру
                             </button>
                             <button class="admin-btn danger-btn" id="reset-btn">
                                 <i class="fas fa-trash"></i>
                                 Сбросить сегодня
+                            </button>
+                            <button class="admin-btn danger-btn" id="clear-cache-btn">
+                                <i class="fas fa-broom"></i>
+                                Очистить кэш
                             </button>
                         </div>
                     </div>
@@ -611,6 +642,14 @@
                                 <i class="fas fa-database"></i>
                                 Просмотр localStorage
                             </button>
+                            <button class="admin-btn" id="export-settings-btn">
+                                <i class="fas fa-cog"></i>
+                                Экспорт настроек
+                            </button>
+                            <button class="admin-btn" id="backup-btn">
+                                <i class="fas fa-save"></i>
+                                Создать бекап
+                            </button>
                         </div>
                     </div>
 
@@ -618,15 +657,25 @@
                     <div class="admin-section">
                         <h3><i class="fas fa-info-circle"></i> ИНФОРМАЦИЯ</h3>
                         <div class="admin-info">
-                            <p><strong>Текущая проблема:</strong> Брони сохраняются только в localStorage браузера.</p>
-                            <p><strong>Решение:</strong> Админ должен вручную синхронизировать данные между пользователями.</p>
-                            <p><strong>Инструкция:</strong></p>
-                            <ol>
-                                <li>Игрок создает бронь → сохраняется в ЕГО браузере</li>
-                                <li>Игрок сообщает ID брони админу</li>
-                                <li>Админ добавляет бронь через панель</li>
-                                <li>Все видят обновленные данные</li>
-                            </ol>
+                            <p><strong>Текущий статус:</strong> <span id="connection-status">Проверка...</span></p>
+                            <p><strong>GitHub Token:</strong> <span id="token-status">Не настроен</span></p>
+                            <p><strong>Gist ID:</strong> <code>e79bef9cd93ca3b661f51903cb09914a</code></p>
+                            <p><strong>Последняя синхронизация:</strong> <span id="last-sync">Никогда</span></p>
+                            
+                            <div class="admin-instruction">
+                                <p><strong>Инструкция для админа:</strong></p>
+                                <ol>
+                                    <li>Игрок создает бронь → сохраняется в его браузере</li>
+                                    <li>Игрок сообщает ID брони админу</li>
+                                    <li>Админ нажимает "Синхронизировать брони"</li>
+                                    <li>Все видят обновленные данные</li>
+                                </ol>
+                            </div>
+                            
+                            <div class="admin-credentials">
+                                <p><strong>Доступ к админ-панели:</strong></p>
+                                <p>Пароль: <code>JavaTeam2024!</code> (Сменить в ui.js)</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -648,7 +697,7 @@
             </div>
             
             <div class="footer-copyright">
-                © 2023 JavaTeam. Все права защищены.
+                © 2024 JavaTeam. Все права защищены.
             </div>
             
             <div class="footer-madeby">
@@ -658,8 +707,39 @@
     </footer>
 </div>
 
+<!-- JavaScript файлы -->
 <script src="js/github-db.js"></script>
 <script src="js/ui.js"></script>
+
+<!-- Инициализация -->
+<script>
+    // Добавление токена через JavaScript (опционально)
+    // localStorage.setItem('gh_token', 'ВАШ_ТОКЕН_ЗДЕСЬ');
+    
+    // Проверка при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 JAVATEAM Website Loaded');
+        
+        // Проверяем наличие токена
+        const hasToken = localStorage.getItem('gh_token') || 
+                        document.cookie.match(/gh_token=([^;]+)/)?.[1];
+        
+        if (!hasToken) {
+            console.warn('⚠️ GitHub Token не найден. Брони не будут синхронизироваться между пользователями.');
+            
+            // Показываем сообщение в админ-панели
+            setTimeout(() => {
+                const tokenStatus = document.getElementById('token-status');
+                if (tokenStatus) {
+                    tokenStatus.textContent = 'Не настроен';
+                    tokenStatus.style.color = '#ff4757';
+                }
+            }, 1000);
+        } else {
+            console.log('✅ GitHub Token найден');
+        }
+    });
+</script>
 
 </body>
 </html>
