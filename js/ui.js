@@ -65,12 +65,14 @@ function showPasswordInput() {
     const input = document.getElementById('admin-password');
     const submitBtn = document.getElementById('submit-password');
     
-    input.focus();
+    if (input) input.focus();
     
-    submitBtn.addEventListener('click', checkAdminPassword);
-    input.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') checkAdminPassword();
-    });
+    if (submitBtn) submitBtn.addEventListener('click', checkAdminPassword);
+    if (input) {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkAdminPassword();
+        });
+    }
     
     passwordInput.addEventListener('click', function(e) {
         if (e.target === passwordInput) {
@@ -80,21 +82,23 @@ function showPasswordInput() {
 }
 
 function checkAdminPassword() {
-    const password = document.getElementById('admin-password').value;
+    const input = document.getElementById('admin-password');
+    if (!input) return;
+    
+    const password = input.value;
     const correctPassword = 'KirillBerezhansky';
     
     if (password === correctPassword) {
         isAdminUnlocked = true;
         showNotification('✅ Доступ разрешен! Админка активирована', 'success');
         hidePasswordInput();
-        // СОЗДАЕМ админку только сейчас
         createAdminPage();
         addAdminButton();
         openPage('admin');
     } else {
         showNotification('❌ Неверный пароль!', 'error');
-        document.getElementById('admin-password').value = '';
-        document.getElementById('admin-password').focus();
+        input.value = '';
+        input.focus();
     }
 }
 
@@ -110,19 +114,17 @@ function hidePasswordInput() {
 
 // ===== СОЗДАТЬ КНОПКУ АДМИНА =====
 function addAdminButton() {
-    if (!isAdminUnlocked) return; // Только если пароль введен
+    if (!isAdminUnlocked) return;
     
     const menu = document.querySelector('.menu');
     if (!menu) return;
     
-    // Проверяем, есть ли уже кнопка
     const existingBtn = document.querySelector('.menu-btn[data-page="admin"]');
     if (existingBtn) {
         existingBtn.style.display = 'flex';
         return;
     }
     
-    // Создаем новую кнопку
     const adminBtn = document.createElement('button');
     adminBtn.className = 'menu-btn';
     adminBtn.setAttribute('data-page', 'admin');
@@ -139,14 +141,13 @@ function addAdminButton() {
         openPage('admin');
     });
     
-    // Переинициализируем меню
     initMenu();
 }
 
 // ===== СОЗДАТЬ СТРАНИЦУ АДМИНА =====
 function createAdminPage() {
     if (document.getElementById('admin')) return;
-    if (!isAdminUnlocked) return; // Только для админа
+    if (!isAdminUnlocked) return;
     
     const adminHTML = `
     <section class="page-block" id="admin">
@@ -222,14 +223,6 @@ function createAdminPage() {
                             <i class="fas fa-database"></i>
                             Просмотр localStorage
                         </button>
-                    </div>
-                </div>
-
-                <div class="admin-section">
-                    <h3><i class="fas fa-info-circle"></i> ИНФОРМАЦИЯ</h3>
-                    <div class="admin-info">
-                        <p><strong>Текущая проблема:</strong> Брони сохраняются только в localStorage браузера.</p>
-                        <p><strong>Решение:</strong> Админ должен вручную синхронизировать данные.</p>
                     </div>
                 </div>
             </div>
@@ -309,19 +302,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('🚀 JAVATEAM Website Started');
     
     try {
-        // Инициализация скрытой админки
         initHiddenAdmin();
-        
-        // Инициализация основных функций
         initMenu();
         initPrakiBookingSystem();
         initOtherElements();
         initHistory();
         
-        // Загружаем данные
         await loadData();
-        
-        // Добавляем CSS
         addAdminStyles();
         
         console.log('✅ Все системы запущены');
@@ -335,14 +322,13 @@ document.addEventListener('DOMContentLoaded', async function() {
 // ===== ЗАГРУЗКА ДАННЫХ =====
 async function loadData() {
     console.log('📥 Loading data...');
-    showNotification('Загрузка данных...', 'info');
     
     try {
         bookings = await db.getBookings();
-        console.log('📅 Bookings from GitHub:', bookings.length);
+        console.log('📅 Bookings from GitHub:', bookings);
         
         const localBookings = db.getFromLocalStorage();
-        console.log('💾 Local bookings:', localBookings.length);
+        console.log('💾 Local bookings:', localBookings);
         
         const allBookings = [...bookings];
         localBookings.forEach(local => {
@@ -352,11 +338,13 @@ async function loadData() {
         });
         
         bookings = allBookings;
+        console.log('📊 All bookings after merge:', bookings);
+        
         updateBookingsDisplay();
         updateTimeSlotsFromBookings();
         
         gamesHistory = await db.getGames();
-        console.log('🎮 Games history:', gamesHistory.length);
+        console.log('🎮 Games history:', gamesHistory);
         renderGamesTable();
         updateStats();
         updateInfoStats();
@@ -368,6 +356,7 @@ async function loadData() {
     } catch (error) {
         console.error('❌ Ошибка загрузки данных:', error);
         showNotification('Ошибка загрузки данных', 'error');
+        
         updateBookingsDisplay();
         renderGamesTable();
     }
@@ -375,10 +364,11 @@ async function loadData() {
 
 // ===== ОБНОВИТЬ СТАТИСТИКУ АДМИНА =====
 function updateAdminStats() {
-    if (!isAdminUnlocked) return; // Только для админа
+    if (!isAdminUnlocked) return;
     
     const today = new Date().toISOString().split('T')[0];
     const todayBookings = bookings.filter(b => b.bookingDate === today);
+    
     const adminTodayBookings = document.getElementById('admin-today-bookings');
     if (adminTodayBookings) adminTodayBookings.textContent = todayBookings.length;
     
@@ -428,6 +418,7 @@ function openPage(pageId) {
             
             if (pageId === 'info') updateInfoStats();
             if (pageId === 'praki') updateBookingsDisplay();
+            if (pageId === 'history') updateStats();
             if (pageId === 'admin') updateAdminStats();
             
         }, 300);
@@ -482,7 +473,8 @@ function initPrakiBookingSystem() {
     document.querySelectorAll('.time-slot').forEach(slot => {
         slot.addEventListener('click', function() {
             const time = this.getAttribute('data-time');
-            const isBooked = this.querySelector('.time-status').classList.contains('booked');
+            const statusElement = this.querySelector('.time-status');
+            const isBooked = statusElement && statusElement.classList.contains('booked');
             
             if (isBooked) {
                 showNotification(`Время ${time} уже занято!`, 'error');
@@ -548,8 +540,10 @@ function validatePrakiBookingForm() {
 async function createBooking() {
     const teamName = document.getElementById('team-name').value.trim();
     const captainName = document.getElementById('captain-name').value.trim();
-    const teamRoster = document.getElementById('team-roster').value.trim().split(',').map(p => p.trim());
-    const comment = document.getElementById('comment').value.trim();
+    const teamRosterInput = document.getElementById('team-roster');
+    const teamRoster = teamRosterInput ? teamRosterInput.value.trim().split(',').map(p => p.trim()) : [];
+    const commentInput = document.getElementById('comment');
+    const comment = commentInput ? commentInput.value.trim() : '';
     
     const selectedMaps = [];
     document.querySelectorAll('.map-btn.active').forEach(btn => {
@@ -632,43 +626,69 @@ function updateTimeSlotsFromBookings() {
     });
 }
 
+// ===== ИСПРАВЛЕННАЯ ФУНКЦИЯ ОТОБРАЖЕНИЯ БРОНЕЙ =====
 function updateBookingsDisplay() {
+    console.log('🔄 Обновление таблицы бронирований...');
+    
     const tbody = document.getElementById('bookings-table-body');
     const noBookingsMessage = document.getElementById('no-bookings-message');
     
-    if (!tbody) return;
-    tbody.innerHTML = '';
-    
-    const today = new Date().toISOString().split('T')[0];
-    const todayBookings = bookings.filter(b => b.bookingDate === today);
-    
-    if (todayBookings.length === 0) {
-        if (noBookingsMessage) noBookingsMessage.style.display = 'block';
+    if (!tbody) {
+        console.error('❌ Не найден элемент bookings-table-body');
         return;
     }
     
-    if (noBookingsMessage) noBookingsMessage.style.display = 'none';
+    tbody.innerHTML = '';
+    
+    const today = new Date().toISOString().split('T')[0];
+    console.log('📅 Сегодняшняя дата:', today);
+    console.log('📊 Все брони:', bookings);
+    
+    const todayBookings = bookings.filter(b => {
+        const bookingDate = b.bookingDate || b.date;
+        return bookingDate === today;
+    });
+    
+    console.log('✅ Брони на сегодня:', todayBookings);
+    
+    if (todayBookings.length === 0) {
+        console.log('📭 Нет броней на сегодня');
+        if (noBookingsMessage) {
+            noBookingsMessage.style.display = 'block';
+        }
+        return;
+    }
+    
+    if (noBookingsMessage) {
+        noBookingsMessage.style.display = 'none';
+    }
     
     const sortedBookings = todayBookings.sort((a, b) => {
-        return parseInt(a.time.split(':')[0]) - parseInt(b.time.split(':')[0]);
+        const timeA = a.time ? parseInt(a.time.split(':')[0]) : 0;
+        const timeB = b.time ? parseInt(b.time.split(':')[0]) : 0;
+        return timeA - timeB;
     });
     
     sortedBookings.forEach(booking => {
         const row = document.createElement('tr');
-        const formattedDate = new Date(booking.bookingDate).toLocaleDateString('ru-RU');
+        
+        const bookingDate = booking.bookingDate || booking.date;
+        const formattedDate = bookingDate ? new Date(bookingDate).toLocaleDateString('ru-RU') : 'Сегодня';
         const isLocal = booking.isLocal ? ' ⚠️ (локально)' : '';
         
         row.innerHTML = `
-            <td><strong class="booking-time">${booking.time}</strong></td>
-            <td><strong>${booking.teamName}${isLocal}</strong></td>
-            <td>${booking.captainName}</td>
-            <td>${Array.isArray(booking.teamRoster) ? booking.teamRoster.join(', ') : booking.teamRoster}</td>
-            <td>${Array.isArray(booking.maps) ? booking.maps.join(', ') : booking.maps}</td>
+            <td><strong class="booking-time">${booking.time || '18:00'}</strong></td>
+            <td><strong>${booking.teamName || 'Неизвестно'}${isLocal}</strong></td>
+            <td>${booking.captainName || 'Неизвестно'}</td>
+            <td>${Array.isArray(booking.teamRoster) ? booking.teamRoster.join(', ') : (booking.teamRoster || 'Не указан')}</td>
+            <td>${Array.isArray(booking.maps) ? booking.maps.join(', ') : (booking.maps || 'Не указаны')}</td>
             <td>${formattedDate}</td>
         `;
         
         tbody.appendChild(row);
     });
+    
+    console.log('✅ Таблица бронирований обновлена');
 }
 
 // ===== ИСТОРИЯ ИГР =====
@@ -703,7 +723,7 @@ function renderGamesTable() {
         row.innerHTML = `
             <td>${formattedDate}</td>
             <td><strong>${game.opponent}</strong></td>
-            <td class="${resultClass}">${resultText} (${game.score || ''})</td>
+            <td class="${resultClass}">${resultText} ${game.score ? `(${game.score})` : ''}</td>
             <td>${Array.isArray(game.team) ? game.team.join(', ') : game.team}</td>
             <td>${game.comment || '-'}</td>
         `;
@@ -810,7 +830,7 @@ function filterGames() {
         row.innerHTML = `
             <td>${formattedDate}</td>
             <td><strong>${game.opponent}</strong></td>
-            <td class="${resultClass}">${resultText} (${game.score || ''})</td>
+            <td class="${resultClass}">${resultText} ${game.score ? `(${game.score})` : ''}</td>
             <td>${Array.isArray(game.team) ? game.team.join(', ') : game.team}</td>
             <td>${game.comment || '-'}</td>
         `;
@@ -868,10 +888,13 @@ function showNotification(message, type = 'info') {
     
     setTimeout(() => notification.classList.add('show'), 10);
     
-    notification.querySelector('.notification-close').addEventListener('click', function() {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    });
+    const closeBtn = notification.querySelector('.notification-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        });
+    }
     
     setTimeout(() => {
         if (notification.parentNode) {
