@@ -127,9 +127,9 @@ function createAdminPage() {
                             <i class="fas fa-plus"></i>
                             Добавить бронь
                         </button>
-                        <button class="admin-btn" onclick="document.getElementById('add-game-btn').click()">
+                        <button class="admin-btn" onclick="openPage('history')">
                             <i class="fas fa-gamepad"></i>
-                            Добавить игру
+                            К истории игр
                         </button>
                         <button class="admin-btn danger-btn" id="reset-btn">
                             <i class="fas fa-trash"></i>
@@ -297,14 +297,17 @@ function updateAdminStats() {
     // Сегодняшние брони
     const today = new Date().toISOString().split('T')[0];
     const todayBookings = bookings.filter(b => b.bookingDate === today);
-    document.getElementById('admin-today-bookings').textContent = todayBookings.length;
+    const adminTodayBookings = document.getElementById('admin-today-bookings');
+    if (adminTodayBookings) adminTodayBookings.textContent = todayBookings.length;
     
     // Всего игр
-    document.getElementById('admin-total-games').textContent = gamesHistory.length;
+    const adminTotalGames = document.getElementById('admin-total-games');
+    if (adminTotalGames) adminTotalGames.textContent = gamesHistory.length;
     
     // LocalStorage
     const localBookings = db.getFromLocalStorage();
-    document.getElementById('admin-local-bookings').textContent = localBookings.length;
+    const adminLocalBookings = document.getElementById('admin-local-bookings');
+    if (adminLocalBookings) adminLocalBookings.textContent = localBookings.length;
 }
 
 // ===== МЕНЮ И ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ =====
@@ -320,10 +323,13 @@ function initMenu() {
         });
     });
     
-    document.querySelector('.logo').addEventListener('click', function(e) {
-        e.preventDefault();
-        openPage('info');
-    });
+    const logo = document.querySelector('.logo');
+    if (logo) {
+        logo.addEventListener('click', function(e) {
+            e.preventDefault();
+            openPage('info');
+        });
+    }
 }
 
 function openPage(pageId) {
@@ -408,11 +414,13 @@ function initPrakiBookingSystem() {
             
             document.querySelectorAll('.time-slot').forEach(s => {
                 s.classList.remove('selected');
-                s.querySelector('.time-icon').style.color = '';
+                const timeIcon = s.querySelector('.time-icon');
+                if (timeIcon) timeIcon.style.color = '';
             });
             
             this.classList.add('selected');
-            this.querySelector('.time-icon').style.color = '#ffd700';
+            const timeIcon = this.querySelector('.time-icon');
+            if (timeIcon) timeIcon.style.color = '#ffd700';
             selectedTimeSlot = time;
             
             this.style.transform = 'scale(0.95)';
@@ -439,7 +447,7 @@ function validatePrakiBookingForm() {
     
     requiredInputs.forEach(input => {
         if (!input.value.trim()) {
-            input.style.borderColor = 'var(--danger-color)';
+            input.style.borderColor = '#ff4757';
             isValid = false;
         } else {
             input.style.borderColor = '';
@@ -468,7 +476,8 @@ async function createBooking() {
     
     const selectedMaps = [];
     document.querySelectorAll('.map-btn.active').forEach(btn => {
-        selectedMaps.push(btn.querySelector('span').textContent);
+        const span = btn.querySelector('span');
+        if (span) selectedMaps.push(span.textContent);
     });
     
     const booking = {
@@ -514,7 +523,8 @@ function resetPrakiForm() {
     selectedTimeSlot = null;
     document.querySelectorAll('.time-slot').forEach(slot => {
         slot.classList.remove('selected');
-        slot.querySelector('.time-icon').style.color = '';
+        const timeIcon = slot.querySelector('.time-icon');
+        if (timeIcon) timeIcon.style.color = '';
     });
 }
 
@@ -522,16 +532,18 @@ function updateTimeSlotStatus(time, status, teamName = '') {
     const timeElement = document.querySelector(`.time-slot[data-time="${time}"]`);
     if (timeElement) {
         const statusElement = timeElement.querySelector('.time-status');
-        statusElement.className = 'time-status ' + status;
-        
-        if (status === 'booked') {
-            statusElement.textContent = `Занято: ${teamName}`;
-            timeElement.style.opacity = '0.7';
-            timeElement.style.cursor = 'not-allowed';
-        } else {
-            statusElement.textContent = 'Свободно';
-            timeElement.style.opacity = '1';
-            timeElement.style.cursor = 'pointer';
+        if (statusElement) {
+            statusElement.className = 'time-status ' + status;
+            
+            if (status === 'booked') {
+                statusElement.textContent = `Занято: ${teamName}`;
+                timeElement.style.opacity = '0.7';
+                timeElement.style.cursor = 'not-allowed';
+            } else {
+                statusElement.textContent = 'Свободно';
+                timeElement.style.opacity = '1';
+                timeElement.style.cursor = 'pointer';
+            }
         }
     }
 }
@@ -594,7 +606,6 @@ function initHistory() {
     renderGamesTable();
     updateStats();
     initFilters();
-    initModal();
 }
 
 function renderGamesTable() {
@@ -622,7 +633,7 @@ function renderGamesTable() {
         row.innerHTML = `
             <td>${formattedDate}</td>
             <td><strong>${game.opponent}</strong></td>
-            <td class="${resultClass}">${resultText} (${game.score})</td>
+            <td class="${resultClass}">${resultText} (${game.score || ''})</td>
             <td>${Array.isArray(game.team) ? game.team.join(', ') : game.team}</td>
             <td>${game.comment || '-'}</td>
         `;
@@ -655,8 +666,25 @@ function updateInfoStats() {
     const totalGamesEl = document.getElementById('info-total-games');
     const winsEl = document.getElementById('info-wins');
     
-    if (totalGamesEl) totalGamesEl.textContent = totalGames;
-    if (winsEl) winsEl.textContent = wins;
+    if (totalGamesEl) {
+        animateCounter(totalGamesEl, 0, totalGames, 1000);
+    }
+    if (winsEl) {
+        animateCounter(winsEl, 0, wins, 1000);
+    }
+}
+
+function animateCounter(element, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        element.textContent = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
 }
 
 function initFilters() {
@@ -712,7 +740,7 @@ function filterGames() {
         row.innerHTML = `
             <td>${formattedDate}</td>
             <td><strong>${game.opponent}</strong></td>
-            <td class="${resultClass}">${resultText} (${game.score})</td>
+            <td class="${resultClass}">${resultText} (${game.score || ''})</td>
             <td>${Array.isArray(game.team) ? game.team.join(', ') : game.team}</td>
             <td>${game.comment || '-'}</td>
         `;
@@ -721,38 +749,189 @@ function filterGames() {
     });
 }
 
-function initModal() {
-    const modal = document.getElementById('add-game-modal');
-    const addGameBtn = document.getElementById('add-game-btn');
-    const closeModalBtn = document.getElementById('close-modal');
-    const cancelBtn = document.getElementById('cancel-game');
-    const form = document.getElementById('add-game-form');
-    
-    if (!modal) return;
-    
-    if (addGameBtn) {
-        addGameBtn.addEventListener('click', function() {
-            modal.classList.add('active');
-            document.getElementById('game-date').value = new Date().toISOString().split('T')[0];
+// ===== ИНИЦИАЛИЗАЦИЯ ДРУГИХ ЭЛЕМЕНТОВ =====
+function initOtherElements() {
+    // Кнопка присоединения на главной
+    const joinBtn = document.querySelector('.info-join-btn');
+    if (joinBtn) {
+        joinBtn.addEventListener('click', function() {
+            openPage('praki');
         });
     }
     
-    function closeModal() {
-        modal.classList.remove('active');
-        if (form) form.reset();
+    // Статистика членов команды
+    initMemberCards();
+}
+
+function initMemberCards() {
+    const memberCards = document.querySelectorAll('.member-card');
+    memberCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = '';
+            this.style.boxShadow = '';
+        });
+        
+        card.addEventListener('click', function() {
+            const player = this.getAttribute('data-player');
+            showNotification(`Игрок: ${player}`, 'info');
+        });
+    });
+}
+
+// ===== УВЕДОМЛЕНИЯ =====
+function showNotification(message, type = 'info') {
+    // Удаляем старые уведомления
+    const oldNotification = document.querySelector('.notification');
+    if (oldNotification) {
+        oldNotification.remove();
     }
     
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    // Создаем новое уведомление
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+        <button class="notification-close"><i class="fas fa-times"></i></button>
+    `;
     
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) closeModal();
+    document.body.appendChild(notification);
+    
+    // Анимация появления
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // Кнопка закрытия
+    notification.querySelector('.notification-close').addEventListener('click', function() {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
     });
     
-    if (form) {
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const gameData = {
-                date: document.getElementById('game-date').value,
-               
+    // Автоматическое закрытие
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 5000);
+}
+
+// ===== CSS для уведомлений =====
+function addNotificationStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--dark-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            border-left: 4px solid #00ff88;
+            max-width: 400px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left-color: #00ff88;
+        }
+        
+        .notification.error {
+            border-left-color: #ff4757;
+        }
+        
+        .notification.info {
+            border-left-color: #0099ff;
+        }
+        
+        .notification i.fa-check-circle {
+            color: #00ff88;
+        }
+        
+        .notification i.fa-exclamation-circle {
+            color: #ff4757;
+        }
+        
+        .notification i.fa-info-circle {
+            color: #0099ff;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            margin-left: auto;
+        }
+        
+        .notification-close:hover {
+            opacity: 1;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Добавляем стили при загрузке
+addNotificationStyles();
+
+// ===== АНИМАЦИЯ СЧЕТЧИКОВ =====
+function initCounters() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const counter = entry.target;
+                const target = +counter.getAttribute('data-target');
+                const duration = 1000;
+                let start = 0;
+                
+                const updateCounter = () => {
+                    const increment = target / (duration / 16);
+                    start += increment;
+                    
+                    if (start < target) {
+                        counter.textContent = Math.floor(start);
+                        setTimeout(updateCounter, 16);
+                    } else {
+                        counter.textContent = target;
+                    }
+                };
+                
+                updateCounter();
+                observer.unobserve(counter);
+            }
+        });
+    });
+    
+    document.querySelectorAll('.stat-number').forEach(counter => {
+        observer.observe(counter);
+    });
+}
+
+// ===== РЕСИВЕР ДЛЯ ВНЕШНИХ СООБЩЕНИЙ =====
+window.addEventListener('message', function(event) {
+    if (event.data.type === 'refreshData') {
+        loadData();
+        showNotification('Данные обновлены', 'success');
+    }
+});
+
+console.log('✅ JAVATEAM UI Ready!');
