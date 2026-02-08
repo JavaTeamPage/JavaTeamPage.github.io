@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -30,7 +29,7 @@
             <span>JavaTeam</span>
         </div>
 
-        <!-- МЕНЮ (4 кнопки) -->
+        <!-- МЕНЮ (5 кнопок) -->
         <nav class="menu">
             <button class="menu-btn active" data-page="info">
                 <div class="menu-icon">
@@ -58,6 +57,13 @@
                     <i class="fas fa-history"></i>
                 </div>
                 <span>ИСТОРИЯ</span>
+            </button>
+
+            <button class="menu-btn admin-panel-btn" data-page="admin">
+                <div class="menu-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <span>АДМИН</span>
             </button>
         </nav>
 
@@ -189,225 +195,7 @@
                     </div>
                     
                     <div class="members-grid">
-                        <!-- Игрок 1 -->
-                        <div class="member-card" data-player="v3k">
-                            <div class="member-card-inner">
-                                <div class="member-image1">
-                                    <img src="https://via.placeholder.com/350x200/ffd700/000?text=V3k" alt="V3k">
-                                    <div class="member-rank">Капитан</div>
-                                </div>
-                                <div class="member-info">
-                                    <div class="member-header">
-                                        <div class="member-name">V3k</div>
-                                        <div class="member-role">
-                                            <i class="fas fa-crown"></i>
-                                            КАПИТАН
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-stats">
-                                        <div class="stat">
-                                            <div class="stat-value">1.84</div>
-                                            <div class="stat-label">K/D</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">50%</div>
-                                            <div class="stat-label">Хедшоты</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">378</div>
-                                            <div class="stat-label">hour</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-desc">
-                                        Стратег команды, отвечает за тактические построения и контроль темпа игры.
-                                    </div>
-                                    
-                                    <div class="member-skills">
-                                        <span class="skill">Стратегия</span>
-                                        <span class="skill">IGL</span>
-                                        <span class="skill">AWP</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Игрок 2 -->
-                        <div class="member-card" data-player="paradox">
-                            <div class="member-card-inner">
-                                <div class="member-image2">
-                                    <img src="https://via.placeholder.com/350x200/9d00ff/fff?text=Paradox" alt="Paradox">
-                                    <div class="member-rank">Люркер</div>
-                                </div>
-                                <div class="member-info">
-                                    <div class="member-header">
-                                        <div class="member-name">Paradox</div>
-                                        <div class="member-role">
-                                            <i class="fas fa-user-ninja"></i>
-                                            ЛЮРКЕР
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-stats">
-                                        <div class="stat">
-                                            <div class="stat-value">1.27</div>
-                                            <div class="stat-label">K/D</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">50.2%</div>
-                                            <div class="stat-label">Хедшоты</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">850</div>
-                                            <div class="stat-label">hour</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-desc">
-                                        Мастер скрытных перемещений и неожиданных атак со спины противника.
-                                    </div>
-                                    
-                                    <div class="member-skills">
-                                        <span class="skill">Фланги</span>
-                                        <span class="skill">Скрытность</span>
-                                        <span class="skill">Клинер</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Игрок 3 -->
-                        <div class="member-card" data-player="maybe">
-                            <div class="member-card-inner">
-                                <div class="member-image3">
-                                    <img src="https://via.placeholder.com/350x200/00ff88/000?text=Maybe%3F" alt="Maybe?">
-                                    <div class="member-rank">SUPREME</div>
-                                </div>
-                                <div class="member-info">
-                                    <div class="member-header">
-                                        <div class="member-name">Maybe?</div>
-                                        <div class="member-role">
-                                            <i class="fas fa-crosshairs"></i>
-                                            СНАЙПЕР
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-stats">
-                                        <div class="stat">
-                                            <div class="stat-value">1.84</div>
-                                            <div class="stat-label">K/D</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">53.3%</div>
-                                            <div class="stat-label">Хедшоты</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">1363</div>
-                                            <div class="stat-label">hour</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-desc">
-                                        Снайпер с невероятной точностью. Может выиграть раунд одним удачным выстрелом.
-                                    </div>
-                                    
-                                    <div class="member-skills">
-                                        <span class="skill">AWP</span>
-                                        <span class="skill">Хедшоты</span>
-                                        <span class="skill">Опенер</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Игрок 4 -->
-                        <div class="member-card" data-player="Eclipse">
-                            <div class="member-card-inner">
-                                <div class="member-image4">
-                                    <img src="https://via.placeholder.com/350x200/ff4757/fff?text=Blast" alt="Eclipse">
-                                    <div class="member-rank">Рифлер</div>
-                                </div>
-                                <div class="member-info">
-                                    <div class="member-header">
-                                        <div class="member-name">Eclipse</div>
-                                        <div class="member-role">
-                                            <i class="fas fa-bomb"></i>
-                                            РИФЛЕР
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-stats">
-                                        <div class="stat">
-                                            <div class="stat-value">1.84</div>
-                                            <div class="stat-label">K/D</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">53.5%</div>
-                                            <div class="stat-label">Хедшоты</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">565</div>
-                                            <div class="stat-label">hour</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-desc">
-                                        Агрессивный рифлер, специалист по входам на сайты и созданию пространства для команды.
-                                    </div>
-                                    
-                                    <div class="member-skills">
-                                        <span class="skill">Энтри</span>
-                                        <span class="skill">Агрессия</span>
-                                        <span class="skill">Трейд</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Игрок 5 -->
-                        <div class="member-card" data-player="k3llmy">
-                            <div class="member-card-inner">
-                                <div class="member-image5">
-                                    <img src="https://via.placeholder.com/350x200/0099ff/fff?text=Snowy" alt="k3llmy">
-                                    <div class="member-rank">Опенфрагер</div>
-                                </div>
-                                <div class="member-info">
-                                    <div class="member-header">
-                                        <div class="member-name">k3llmy</div>
-                                        <div class="member-role">
-                                            <i class="fas fa-running"></i>
-                                            ОПЕНФРАГЕР
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-stats">
-                                        <div class="stat">
-                                            <div class="stat-value">1.38</div>
-                                            <div class="stat-label">K/D</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">41.7%</div>
-                                            <div class="stat-label">Хедшоты</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">543</div>
-                                            <div class="stat-label">hour</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-desc">
-                                        Быстрый и мобильный игрок, специализируется на открытии фрагов и разведке.
-                                    </div>
-                                    
-                                    <div class="member-skills">
-                                        <span class="skill">Скорость</span>
-                                        <span class="skill">Разведка</span>
-                                        <span class="skill">Патруль</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Игроки будут загружены через JS -->
                     </div>
                 </div>
 
@@ -422,93 +210,7 @@
                     </div>
                     
                     <div class="members-grid">
-                        <!-- Тренер -->
-                        <div class="member-card coach-card" data-player="pastic">
-                            <div class="member-card-inner">
-                                <div class="member-image">
-                                    <img src="https://via.placeholder.com/350x200/ffd700/000?text=Pastic" alt="Pastic">
-                                    <div class="member-rank">ТРЕНЕР</div>
-                                </div>
-                                <div class="member-info">
-                                    <div class="member-header">
-                                        <div class="member-name">Pastic</div>
-                                        <div class="member-role">
-                                            <i class="fas fa-chalkboard-teacher"></i>
-                                            ТРЕНЕР
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-stats">
-                                        <div class="stat">
-                                            <div class="stat-value">7+</div>
-                                            <div class="stat-label">Лет опыта</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">50+</div>
-                                            <div class="stat-label">Лучших тактик</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">100%</div>
-                                            <div class="stat-label">Понимание</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-desc">
-                                        Опытный тренер с глубоким пониманием игры. Отвечает за тактическую подготовку и анализ соперников.
-                                    </div>
-                                    
-                                    <div class="member-skills">
-                                        <span class="skill">Тактика</span>
-                                        <span class="skill">Анализ</span>
-                                        <span class="skill">Психология</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Рекрут -->
-                        <div class="member-card recruit-card" data-player="blast">
-                            <div class="member-card-inner">
-                                <div class="member-image">
-                                    <img src="https://via.placeholder.com/350x200/00ff88/000?text=exluseV" alt="blast">
-                                    <div class="member-rank">РЕКРУТ</div>
-                                </div>
-                                <div class="member-info">
-                                    <div class="member-header">
-                                        <div class="member-name">blast</div>
-                                        <div class="member-role">
-                                            <i class="fas fa-seedling"></i>
-                                            РЕКРУТ
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-stats">
-                                        <div class="stat">
-                                            <div class="stat-value">1.56</div>
-                                            <div class="stat-label">K/D</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">54.4%</div>
-                                            <div class="stat-label">Хедшоты</div>
-                                        </div>
-                                        <div class="stat">
-                                            <div class="stat-value">505</div>
-                                            <div class="stat-label">hour</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="member-desc">
-                                        Перспективный игрок с большим потенциалом. Проходит адаптацию к командной игре.
-                                    </div>
-                                    
-                                    <div class="member-skills">
-                                        <span class="skill">Потенциал</span>
-                                        <span class="skill">Адаптация</span>
-                                        <span class="skill">Мотивация</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Поддержка будет загружена через JS -->
                     </div>
                 </div>
             </div>
@@ -824,6 +526,112 @@
                 </div>
             </div>
         </section>
+
+        <!-- ******************************************************* -->
+        <!-- ADMIN -->
+        <!-- ******************************************************* -->
+        <section class="page-block" id="admin">
+            <div class="admin-container">
+                <div class="section-header">
+                    <div class="section-title-wrapper">
+                        <div class="section-title-bg">АДМИН</div>
+                        <h2 class="section-title">ПАНЕЛЬ УПРАВЛЕНИЯ</h2>
+                    </div>
+                    <div class="section-subtitle">Управление бронированиями и играми</div>
+                    <div class="section-line"></div>
+                </div>
+
+                <div class="admin-panel">
+                    <!-- СТАТИСТИКА -->
+                    <div class="admin-section">
+                        <h3><i class="fas fa-chart-bar"></i> СТАТИСТИКА</h3>
+                        <div class="admin-stats">
+                            <div class="admin-stat">
+                                <div class="stat-label">Сегодняшних броней</div>
+                                <div class="stat-value" id="admin-today-bookings">0</div>
+                            </div>
+                            <div class="admin-stat">
+                                <div class="stat-label">Всего игр</div>
+                                <div class="stat-value" id="admin-total-games">0</div>
+                            </div>
+                            <div class="admin-stat">
+                                <div class="stat-label">В localStorage</div>
+                                <div class="stat-value" id="admin-local-bookings">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- СИНХРОНИЗАЦИЯ -->
+                    <div class="admin-section">
+                        <h3><i class="fas fa-sync-alt"></i> СИНХРОНИЗАЦИЯ</h3>
+                        <div class="admin-actions">
+                            <button class="admin-btn" id="sync-btn">
+                                <i class="fas fa-sync"></i>
+                                Синхронизировать брони
+                            </button>
+                            <button class="admin-btn" id="refresh-btn">
+                                <i class="fas fa-redo"></i>
+                                Обновить данные
+                            </button>
+                            <button class="admin-btn" id="check-token-btn">
+                                <i class="fas fa-key"></i>
+                                Проверить токен
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- УПРАВЛЕНИЕ -->
+                    <div class="admin-section">
+                        <h3><i class="fas fa-tools"></i> УПРАВЛЕНИЕ</h3>
+                        <div class="admin-actions">
+                            <button class="admin-btn" onclick="openPage('praki')">
+                                <i class="fas fa-plus"></i>
+                                Добавить бронь
+                            </button>
+                            <button class="admin-btn" onclick="openPage('history')">
+                                <i class="fas fa-gamepad"></i>
+                                К истории игр
+                            </button>
+                            <button class="admin-btn danger-btn" id="reset-btn">
+                                <i class="fas fa-trash"></i>
+                                Сбросить сегодня
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ЭКСПОРТ -->
+                    <div class="admin-section">
+                        <h3><i class="fas fa-download"></i> ЭКСПОРТ</h3>
+                        <div class="admin-actions">
+                            <button class="admin-btn" id="export-btn">
+                                <i class="fas fa-file-export"></i>
+                                Экспорт данных
+                            </button>
+                            <button class="admin-btn" id="view-local-btn">
+                                <i class="fas fa-database"></i>
+                                Просмотр localStorage
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ИНФОРМАЦИЯ -->
+                    <div class="admin-section">
+                        <h3><i class="fas fa-info-circle"></i> ИНФОРМАЦИЯ</h3>
+                        <div class="admin-info">
+                            <p><strong>Текущая проблема:</strong> Брони сохраняются только в localStorage браузера.</p>
+                            <p><strong>Решение:</strong> Админ должен вручную синхронизировать данные между пользователями.</p>
+                            <p><strong>Инструкция:</strong></p>
+                            <ol>
+                                <li>Игрок создает бронь → сохраняется в ЕГО браузере</li>
+                                <li>Игрок сообщает ID брони админу</li>
+                                <li>Админ добавляет бронь через панель</li>
+                                <li>Все видят обновленные данные</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <footer class="footer">
@@ -849,10 +657,9 @@
         </div>
     </footer>
 </div>
+
 <script src="js/github-db.js"></script>
 <script src="js/ui.js"></script>
+
 </body>
-
 </html>
-
-
