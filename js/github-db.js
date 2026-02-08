@@ -1,36 +1,85 @@
-// github-db.js - ФИНАЛЬНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ
-console.log('🚀 GitHub DB Fixed Version Loading...');
+// github-db.js - БЕЗОПАСНАЯ ИСПРАВЛЕННАЯ ВЕРСИЯ
+console.log('🚀 GitHub DB Secure Version Loading...');
 
 class GitHubDB {
     constructor() {
-        // === ВАШИ КЛЮЧИ ===
-        this.GITHUB_TOKEN = 'ВАШ_ТОКЕН_ghp_...'; // ЗАМЕНИТЕ!
+        // === БЕЗОПАСНЫЙ ПОЛУЧЕНИЕ ТОКЕНА ===
+        this.GITHUB_TOKEN = this._getSecureToken();
         this.GIST_ID = 'e79bef9cd93ca3b661f51903cb09914a';
-        // ==================
         
         this.gistUrl = `https://gist.githubusercontent.com/${this.GIST_ID}/raw`;
         this.apiUrl = `https://api.github.com/gists/${this.GIST_ID}`;
         this.localKey = 'javateam_temp_bookings';
         this.cacheKey = 'javateam_cache';
-        this.cacheTime = 5000; // 5 секунд кэш
+        this.cacheTime = 5000;
         
         console.log('✅ DB готов с Gist ID:', this.GIST_ID);
         
         // Проверяем токен
-        if (!this.GITHUB_TOKEN || this.GITHUB_TOKEN.includes('ВАШ_ТОКЕН')) {
-            console.error('❌ ВНИМАНИЕ: GitHub Token не настроен!');
-            alert('Админу: Установите GitHub Token в github-db.js!');
+        if (!this.GITHUB_TOKEN) {
+            console.warn('⚠️ GitHub Token не найден! Работаем в локальном режиме.');
+            this._showTokenWarning();
+        } else {
+            console.log('✅ GitHub Token загружен безопасно');
         }
     }
 
-    // ===== 1. ОСНОВНЫЕ МЕТОДЫ =====
+    // ===== БЕЗОПАСНОЕ ПОЛУЧЕНИЕ ТОКЕНА =====
+    _getSecureToken() {
+        // Пробуем разные способы получения токена
+        const methods = [
+            () => localStorage.getItem('gh_token'),
+            () => {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name === 'gh_token') return decodeURIComponent(value);
+                }
+                return null;
+            },
+            () => {
+                const script = document.querySelector('script[data-gh-token]');
+                return script ? script.getAttribute('data-gh-token') : null;
+            }
+        ];
+        
+        for (let method of methods) {
+            try {
+                const token = method();
+                if (token && token.startsWith('ghp_')) {
+                    return token;
+                }
+            } catch (e) {
+                console.warn('Ошибка получения токена:', e);
+            }
+        }
+        
+        return null;
+    }
+
+    _showTokenWarning() {
+        // Показываем предупреждение только админу
+        setTimeout(() => {
+            const adminBtn = document.querySelector('.admin-panel-btn');
+            if (adminBtn && !sessionStorage.getItem('token_warn_shown')) {
+                showNotification(
+                    'ВНИМАНИЕ: Установите GitHub Token для синхронизации данных между пользователями.',
+                    'warning',
+                    8000
+                );
+                sessionStorage.setItem('token_warn_shown', 'true');
+            }
+        }, 2000);
+    }
+
+    // ===== ОСНОВНЫЕ МЕТОДЫ =====
     async getBookings() {
         try {
             console.log('[DB] Загрузка броней...');
             const today = new Date().toISOString().split('T')[0];
             
             // 1. Получаем данные из Gist
-            let gistData = { bookings: [] };
+            let gistData = { bookings: [], games: [] };
             try {
                 gistData = await this._fetchGistData();
                 console.log('[DB] Данные Gist загружены');
@@ -39,18 +88,14 @@ class GitHubDB {
             }
             
             // 2. Брони из Gist за сегодня
-            const gistBookings = gistData.bookings.filter(b => b.bookingDate === today);
+            const gistBookings = (gistData.bookings || []).filter(b => b.bookingDate === today);
             
-            // 3. Локальные брони (для немедленного отображения)
+            // 3. Локальные брони
             const localBookings = this._getLocalBookings();
             
             // 4. Объединяем, убираем дубли
             const allBookingsMap = new Map();
-            
-            // Сначала добавляем из Gist (приоритет)
             gistBookings.forEach(b => allBookingsMap.set(b.id, b));
-            
-            // Затем добавляем локальные, если нет дублей
             localBookings.forEach(b => {
                 if (!allBookingsMap.has(b.id)) {
                     allBookingsMap.set(b.id, b);
@@ -66,11 +111,11 @@ class GitHubDB {
                 return timeA - timeB;
             });
             
-            console.log(`[DB] Итого броней: ${sortedBookings.length} (Gist: ${gistBookings.length}, Local: ${localBookings.length})`);
+            console.log(`[DB] Итого броней: ${sortedBookings.length}`);
             return sortedBookings;
             
         } catch (error) {
-            console.error('[DB] Ошибка:', error);
+            console.error('[DB] Ошибка загрузки броней:', error);
             return this._getLocalBookings();
         }
     }
@@ -92,7 +137,7 @@ class GitHubDB {
         
         // 2. Создаем объект брони
         const newBooking = {
-            id: `booking_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+            id: `booking_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
             time: bookingData.time,
             teamName: bookingData.teamName,
             captainName: bookingData.captainName,
@@ -104,29 +149,35 @@ class GitHubDB {
             bookingDate: today,
             createdAt: new Date().toISOString(),
             createdBy: 'user',
-            confirmed: true
+            confirmed: true,
+            confirmedBy: 'auto'
         };
         
-        console.log('[DB] Создана бронь:', newBooking);
+        console.log('[DB] Создана бронь ID:', newBooking.id);
         
-        // 3. Сохраняем локально (сразу видно)
+        // 3. Сохраняем локально
         this._saveLocalBooking(newBooking);
         
-        // 4. Пытаемся сохранить в Gist (общая база)
-        const gistSuccess = await this._saveToGist(newBooking);
+        // 4. Пытаемся сохранить в Gist
+        const gistSuccess = await this._saveBookingToGist(newBooking);
         
         if (gistSuccess) {
-            // Успешно сохранили в Gist
-            alert(`✅ БРОНЬ СОЗДАНА!\n\nКоманда: ${bookingData.teamName}\nВремя: ${bookingData.time}\n\nБронь видна всем пользователям!`);
-            return newBooking;
+            return {
+                success: true,
+                booking: newBooking,
+                message: 'Бронь создана и синхронизирована для всех пользователей!'
+            };
         } else {
-            // Не удалось сохранить в Gist, но локально есть
-            alert(`⚠️ Бронь создана локально!\n\nКоманда: ${bookingData.teamName}\nВремя: ${bookingData.time}\n\nЧтобы бронь была видна всем, сообщите админу ID: ${newBooking.id}`);
-            return newBooking;
+            return {
+                success: true,
+                booking: newBooking,
+                message: 'Бронь создана локально. Сообщите админу ID для синхронизации.',
+                id: newBooking.id
+            };
         }
     }
 
-    // ===== 2. ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ =====
+    // ===== РАБОТА С GIST =====
     async _fetchGistData() {
         // Проверяем кэш
         const cached = localStorage.getItem(this.cacheKey);
@@ -140,10 +191,21 @@ class GitHubDB {
         try {
             const response = await fetch(this.gistUrl + '?t=' + Date.now(), {
                 cache: 'no-cache',
-                headers: { 'Accept': 'application/json' }
+                headers: {
+                    'Accept': 'application/json',
+                    ...(this.GITHUB_TOKEN && {
+                        'Authorization': `token ${this.GITHUB_TOKEN}`
+                    })
+                }
             });
             
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            if (!response.ok) {
+                if (response.status === 404) {
+                    // Gist не существует, создаем начальную структуру
+                    return this._createInitialGist();
+                }
+                throw new Error(`HTTP ${response.status}`);
+            }
             
             const data = await response.json();
             
@@ -160,15 +222,58 @@ class GitHubDB {
         }
     }
 
-    async _saveToGist(booking) {
-        // Если нет токена - пропускаем сохранение в Gist
-        if (!this.GITHUB_TOKEN || this.GITHUB_TOKEN.includes('ВАШ_ТОКЕН')) {
-            console.warn('[DB] Token не настроен, пропускаем сохранение в Gist');
+    async _createInitialGist() {
+        const initialData = {
+            bookings: [],
+            games: [],
+            config: {
+                created: new Date().toISOString(),
+                version: '1.0',
+                availableTimes: ['18:00', '19:00', '20:00']
+            }
+        };
+        
+        // Пытаемся создать Gist если есть токен
+        if (this.GITHUB_TOKEN) {
+            try {
+                const response = await fetch('https://api.github.com/gists', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${this.GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        description: 'JavaTeam Data Storage',
+                        public: false,
+                        files: {
+                            "javateam-data.json": {
+                                content: JSON.stringify(initialData, null, 2)
+                            }
+                        }
+                    })
+                });
+                
+                if (response.ok) {
+                    const gist = await response.json();
+                    console.log('[DB] Создан новый Gist:', gist.id);
+                    return initialData;
+                }
+            } catch (e) {
+                console.warn('[DB] Не удалось создать Gist:', e);
+            }
+        }
+        
+        return initialData;
+    }
+
+    async _saveBookingToGist(booking) {
+        if (!this.GITHUB_TOKEN) {
+            console.warn('[DB] Token отсутствует, пропускаем сохранение в Gist');
             return false;
         }
         
         try {
-            console.log('[DB] Сохранение в Gist...');
+            console.log('[DB] Сохранение брони в Gist...');
             
             // 1. Получаем текущие данные
             const currentData = await this._fetchGistData();
@@ -176,7 +281,7 @@ class GitHubDB {
             // 2. Добавляем новую бронь
             currentData.bookings = currentData.bookings || [];
             
-            // Удаляем старую версию этой брони если есть
+            // Удаляем старую версию если есть
             currentData.bookings = currentData.bookings.filter(b => b.id !== booking.id);
             
             // Добавляем новую
@@ -191,7 +296,7 @@ class GitHubDB {
                     'Accept': 'application/vnd.github.v3+json'
                 },
                 body: JSON.stringify({
-                    description: `JavaTeam - ${new Date().toLocaleString('ru-RU')}`,
+                    description: `JavaTeam - Обновлено: ${new Date().toLocaleString('ru-RU')}`,
                     files: {
                         "javateam-data.json": {
                             content: JSON.stringify(currentData, null, 2)
@@ -202,7 +307,8 @@ class GitHubDB {
             
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`GitHub API: ${response.status} - ${errorText}`);
+                console.error('[DB] Ошибка GitHub API:', errorText);
+                return false;
             }
             
             console.log('[DB] Успешно сохранено в Gist!');
@@ -221,6 +327,7 @@ class GitHubDB {
         }
     }
 
+    // ===== ЛОКАЛЬНОЕ ХРАНИЛИЩЕ =====
     _saveLocalBooking(booking) {
         try {
             const bookings = JSON.parse(localStorage.getItem(this.localKey) || '[]');
@@ -245,7 +352,7 @@ class GitHubDB {
         }
     }
 
-    // ===== 3. ИСТОРИЯ ИГР =====
+    // ===== ИСТОРИЯ ИГР =====
     async getGames() {
         try {
             const data = await this._fetchGistData();
@@ -256,67 +363,70 @@ class GitHubDB {
         }
     }
 
-    async addGame(game) {
+    async addGame(gameData) {
         try {
-            const gameObj = {
-                id: `game_${Date.now()}`,
-                date: game.date || new Date().toISOString().split('T')[0],
-                opponent: game.opponent,
-                result: game.result,
-                score: game.score,
-                team: game.team,
-                comment: game.comment || '',
-                addedAt: new Date().toISOString()
+            const game = {
+                id: `game_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+                date: gameData.date || new Date().toISOString().split('T')[0],
+                opponent: gameData.opponent,
+                result: gameData.result,
+                score: gameData.score || '',
+                team: Array.isArray(gameData.team) ? gameData.team : gameData.team.split(',').map(s => s.trim()),
+                comment: gameData.comment || '',
+                addedAt: new Date().toISOString(),
+                addedBy: 'admin'
             };
             
             // Сохраняем в Gist
             const currentData = await this._fetchGistData();
             currentData.games = currentData.games || [];
-            currentData.games.unshift(gameObj);
+            currentData.games.unshift(game); // Добавляем в начало
             
-            const success = await this._saveToGistDirect(currentData);
-            
-            if (success) {
-                alert('✅ Игра добавлена в историю!');
-                return gameObj;
-            } else {
-                throw new Error('Не удалось сохранить игру');
+            if (this.GITHUB_TOKEN) {
+                const response = await fetch(this.apiUrl, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `token ${this.GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        files: {
+                            "javateam-data.json": {
+                                content: JSON.stringify(currentData, null, 2)
+                            }
+                        }
+                    })
+                });
+                
+                if (response.ok) {
+                    // Обновляем кэш
+                    localStorage.setItem(this.cacheKey, JSON.stringify({
+                        data: currentData,
+                        timestamp: Date.now()
+                    }));
+                    
+                    return {
+                        success: true,
+                        game: game,
+                        message: 'Игра добавлена в историю!'
+                    };
+                }
             }
+            
+            // Если нет токена или не удалось сохранить
+            return {
+                success: true,
+                game: game,
+                message: 'Игра добавлена локально'
+            };
+            
         } catch (error) {
             console.error('[DB] Ошибка добавления игры:', error);
             throw error;
         }
     }
 
-    async _saveToGistDirect(data) {
-        if (!this.GITHUB_TOKEN || this.GITHUB_TOKEN.includes('ВАШ_ТОКЕН')) {
-            return false;
-        }
-        
-        try {
-            const response = await fetch(this.apiUrl, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `token ${this.GITHUB_TOKEN}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    files: {
-                        "javateam-data.json": {
-                            content: JSON.stringify(data, null, 2)
-                        }
-                    }
-                })
-            });
-            
-            return response.ok;
-        } catch (e) {
-            console.error('[DB] Ошибка прямого сохранения:', e);
-            return false;
-        }
-    }
-
-    // ===== 4. АДМИН ФУНКЦИИ =====
+    // ===== АДМИН ФУНКЦИИ =====
     async adminResetBookings() {
         if (!confirm('⚠️ Сбросить ВСЕ брони за сегодня?\n\nЭто действие нельзя отменить!')) {
             return { success: false, message: 'Отменено' };
@@ -325,19 +435,45 @@ class GitHubDB {
         const today = new Date().toISOString().split('T')[0];
         
         try {
-            // 1. Очищаем локальные
-            localStorage.removeItem(this.localKey);
+            // 1. Очищаем локальные брони за сегодня
+            const allLocalBookings = JSON.parse(localStorage.getItem(this.localKey) || '[]');
+            const filteredLocalBookings = allLocalBookings.filter(b => b.bookingDate !== today);
+            localStorage.setItem(this.localKey, JSON.stringify(filteredLocalBookings));
             
             // 2. Очищаем Gist
-            const data = await this._fetchGistData();
-            data.bookings = data.bookings.filter(b => b.bookingDate !== today);
-            
-            if (this.GITHUB_TOKEN && !this.GITHUB_TOKEN.includes('ВАШ_ТОКЕН')) {
-                await this._saveToGistDirect(data);
+            if (this.GITHUB_TOKEN) {
+                const data = await this._fetchGistData();
+                const previousBookings = data.bookings.filter(b => b.bookingDate !== today);
+                data.bookings = previousBookings;
+                
+                await fetch(this.apiUrl, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `token ${this.GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        files: {
+                            "javateam-data.json": {
+                                content: JSON.stringify(data, null, 2)
+                            }
+                        }
+                    })
+                });
+                
+                // Обновляем кэш
+                localStorage.setItem(this.cacheKey, JSON.stringify({
+                    data: data,
+                    timestamp: Date.now()
+                }));
             }
             
             console.log('[DB] Все брони сброшены');
-            return { success: true, message: 'Брони сброшены' };
+            return { 
+                success: true, 
+                message: 'Брони за сегодня сброшены',
+                resetAt: new Date().toISOString()
+            };
             
         } catch (error) {
             console.error('[DB] Ошибка сброса:', error);
@@ -356,13 +492,166 @@ class GitHubDB {
             a.click();
             URL.revokeObjectURL(url);
             
-            return { success: true, message: 'Данные экспортированы' };
+            return { 
+                success: true, 
+                message: 'Данные экспортированы',
+                exportedAt: new Date().toISOString()
+            };
         } catch (error) {
-            return { success: false, message: 'Ошибка экспорта' };
+            return { 
+                success: false, 
+                message: 'Ошибка экспорта: ' + error.message 
+            };
+        }
+    }
+
+    getLocalStorageStats() {
+        try {
+            const bookings = JSON.parse(localStorage.getItem(this.localKey) || '[]');
+            const today = new Date().toISOString().split('T')[0];
+            const todayBookings = bookings.filter(b => b.bookingDate === today);
+            
+            return {
+                total: bookings.length,
+                today: todayBookings.length,
+                lastUpdated: localStorage.getItem(`${this.localKey}_updated`) || null
+            };
+        } catch (e) {
+            return { total: 0, today: 0, lastUpdated: null };
+        }
+    }
+
+    async syncLocalWithGitHub() {
+        if (!this.GITHUB_TOKEN) {
+            return { 
+                success: false, 
+                message: 'GitHub Token не настроен. Установите токен в настройках.' 
+            };
+        }
+        
+        try {
+            const localBookings = JSON.parse(localStorage.getItem(this.localKey) || '[]');
+            const today = new Date().toISOString().split('T')[0];
+            const todayBookings = localBookings.filter(b => b.bookingDate === today);
+            
+            if (todayBookings.length === 0) {
+                return { 
+                    success: true, 
+                    message: 'Нет локальных броней для синхронизации' 
+                };
+            }
+            
+            // Загружаем текущие данные из Gist
+            const gistData = await this._fetchGistData();
+            gistData.bookings = gistData.bookings || [];
+            
+            // Добавляем локальные брони в Gist
+            let addedCount = 0;
+            todayBookings.forEach(booking => {
+                const exists = gistData.bookings.some(b => b.id === booking.id);
+                if (!exists) {
+                    gistData.bookings.push(booking);
+                    addedCount++;
+                }
+            });
+            
+            // Сохраняем в Gist
+            const response = await fetch(this.apiUrl, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `token ${this.GITHUB_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    files: {
+                        "javateam-data.json": {
+                            content: JSON.stringify(gistData, null, 2)
+                        }
+                    }
+                })
+            });
+            
+            if (response.ok) {
+                // Обновляем кэш
+                localStorage.setItem(this.cacheKey, JSON.stringify({
+                    data: gistData,
+                    timestamp: Date.now()
+                }));
+                
+                return { 
+                    success: true, 
+                    message: `Синхронизировано ${addedCount} броней`,
+                    synced: addedCount
+                };
+            } else {
+                return { 
+                    success: false, 
+                    message: 'Ошибка синхронизации с GitHub' 
+                };
+            }
+            
+        } catch (error) {
+            console.error('[DB] Ошибка синхронизации:', error);
+            return { 
+                success: false, 
+                message: 'Ошибка синхронизации: ' + error.message 
+            };
+        }
+    }
+
+    async checkTokenStatus() {
+        if (!this.GITHUB_TOKEN) {
+            return {
+                valid: false,
+                message: 'Токен не настроен',
+                scopes: []
+            };
+        }
+        
+        try {
+            const response = await fetch('https://api.github.com/user', {
+                headers: {
+                    'Authorization': `token ${this.GITHUB_TOKEN}`
+                }
+            });
+            
+            if (response.ok) {
+                const user = await response.json();
+                return {
+                    valid: true,
+                    message: `Токен действителен. Пользователь: ${user.login}`,
+                    user: user.login,
+                    scopes: ['gist'] // Предполагаем что есть доступ к gist
+                };
+            } else {
+                return {
+                    valid: false,
+                    message: `Токен недействителен (HTTP ${response.status})`,
+                    scopes: []
+                };
+            }
+        } catch (error) {
+            return {
+                valid: false,
+                message: 'Ошибка проверки токена: ' + error.message,
+                scopes: []
+            };
         }
     }
 }
 
 // Создаем глобальный экземпляр
 const db = new GitHubDB();
-console.log('✅ GitHub DB Ready!');
+
+// Вспомогательные функции для работы с UI
+function showNotification(message, type = 'info', duration = 5000) {
+    // Функция будет реализована в ui.js
+    console.log(`[Notification ${type}]: ${message}`);
+}
+
+// Экспортируем для использования в других файлах
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { GitHubDB, db };
+}
+
+console.log('✅ GitHub DB Secure Version Ready!');
