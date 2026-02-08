@@ -1,4 +1,4 @@
-// ui.js - ПОЛНАЯ РАБОЧАЯ ВЕРСИЯ
+// ui.js - ПОЛНАЯ ВЕРСИЯ СО СКРЫТОЙ АДМИНКОЙ
 console.log('🎮 JAVATEAM UI Initializing...');
 
 // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
@@ -6,39 +6,117 @@ let currentPage = 'info';
 let gamesHistory = [];
 let bookings = [];
 let selectedTimeSlot = null;
+let adminClickCount = 0;
+let adminClickTimeout;
 
-// ===== ИНИЦИАЛИЗАЦИЯ =====
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🚀 JAVATEAM Website Started');
-    
-    try {
-        // Показываем админ панель
-        showAdminPanel();
+// ===== СКРЫТАЯ АДМИН-СИСТЕМА =====
+function initHiddenAdmin() {
+    const logo = document.querySelector('.logo');
+    if (logo) {
+        logo.style.cursor = 'pointer';
         
-        // Инициализация
-        initMenu();
-        initPrakiBookingSystem();
-        initOtherElements();
-        initHistory();
-        
-        // Загружаем данные
-        await loadData();
-        
-        console.log('✅ Все системы запущены');
-        
-    } catch (error) {
-        console.error('❌ Ошибка запуска:', error);
-        showNotification('Ошибка загрузки сайта', 'error');
+        logo.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            adminClickCount++;
+            console.log(`👑 Admin click: ${adminClickCount}`);
+            
+            clearTimeout(adminClickTimeout);
+            adminClickTimeout = setTimeout(() => {
+                adminClickCount = 0;
+            }, 2000);
+            
+            // Если кликнули 3 раза - показываем поле для пароля
+            if (adminClickCount === 3) {
+                showPasswordInput();
+                adminClickCount = 0;
+            }
+        });
     }
-});
+}
+
+function showPasswordInput() {
+    // Удаляем старый инпут если есть
+    const oldInput = document.querySelector('.admin-password-input');
+    if (oldInput) oldInput.remove();
+    
+    // Создаем инпут для пароля
+    const passwordInput = document.createElement('div');
+    passwordInput.className = 'admin-password-input';
+    passwordInput.innerHTML = `
+        <div class="password-container">
+            <div class="password-header">
+                <i class="fas fa-lock"></i>
+                <span>АДМИН ДОСТУП</span>
+            </div>
+            <input type="password" id="admin-password" placeholder="Введите пароль" autocomplete="off">
+            <button id="submit-password">
+                <i class="fas fa-key"></i> Войти
+            </button>
+            <div class="password-hint">Подсказка: Фамилия создателя</div>
+        </div>
+    `;
+    
+    document.body.appendChild(passwordInput);
+    
+    // Показываем анимацию
+    setTimeout(() => {
+        passwordInput.classList.add('show');
+    }, 10);
+    
+    // Обработчик ввода пароля
+    const input = document.getElementById('admin-password');
+    const submitBtn = document.getElementById('submit-password');
+    
+    input.focus();
+    
+    submitBtn.addEventListener('click', checkAdminPassword);
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') checkAdminPassword();
+    });
+    
+    // Закрытие при клике вне поля
+    passwordInput.addEventListener('click', function(e) {
+        if (e.target === passwordInput) {
+            hidePasswordInput();
+        }
+    });
+}
+
+function checkAdminPassword() {
+    const password = document.getElementById('admin-password').value;
+    const correctPassword = 'KirillBerezhansky';
+    
+    if (password === correctPassword) {
+        showNotification('✅ Доступ разрешен!', 'success');
+        hidePasswordInput();
+        // Показываем админ-панель
+        showAdminPanel();
+        openPage('admin');
+    } else {
+        showNotification('❌ Неверный пароль!', 'error');
+        document.getElementById('admin-password').value = '';
+        document.getElementById('admin-password').focus();
+    }
+}
+
+function hidePasswordInput() {
+    const passwordInput = document.querySelector('.admin-password-input');
+    if (passwordInput) {
+        passwordInput.classList.remove('show');
+        setTimeout(() => {
+            passwordInput.remove();
+        }, 300);
+    }
+}
 
 // ===== ПОКАЗАТЬ АДМИН ПАНЕЛЬ =====
 function showAdminPanel() {
-    // Находим или создаем кнопку админа
+    // Создаем кнопку админа если её нет
     let adminBtn = document.querySelector('.admin-panel-btn');
     
     if (!adminBtn) {
-        // Создаем кнопку админа
         const menu = document.querySelector('.menu');
         if (menu) {
             adminBtn = document.createElement('button');
@@ -52,7 +130,6 @@ function showAdminPanel() {
             `;
             menu.appendChild(adminBtn);
             
-            // Добавляем обработчик
             adminBtn.addEventListener('click', function() {
                 openPage('admin');
             });
@@ -157,34 +234,25 @@ function createAdminPage() {
                 <div class="admin-section">
                     <h3><i class="fas fa-info-circle"></i> ИНФОРМАЦИЯ</h3>
                     <div class="admin-info">
+                        <p><strong>Пароль админа:</strong> KirillBerezhansky</p>
                         <p><strong>Текущая проблема:</strong> Брони сохраняются только в localStorage браузера.</p>
-                        <p><strong>Решение:</strong> Админ должен вручную синхронизировать данные между пользователями.</p>
-                        <p><strong>Инструкция:</strong></p>
-                        <ol>
-                            <li>Игрок создает бронь → сохраняется в ЕГО браузере</li>
-                            <li>Игрок сообщает ID брони админу</li>
-                            <li>Админ добавляет бронь через панель</li>
-                            <li>Все видят обновленные данные</li>
-                        </ol>
+                        <p><strong>Решение:</strong> Админ должен вручную синхронизировать данные.</p>
+                        <p><strong>Как открыть админку:</strong> Нажать 3 раза на логотип "JavaTeam" вверху</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>`;
     
-    // Добавляем в page-content
     const pageContent = document.querySelector('.page-content');
     if (pageContent) {
         pageContent.insertAdjacentHTML('beforeend', adminHTML);
-        
-        // Инициализируем кнопки админа
         setTimeout(initAdminButtons, 100);
     }
 }
 
 // ===== ИНИЦИАЛИЗАЦИЯ КНОПОК АДМИНА =====
 function initAdminButtons() {
-    // Синхронизация
     const syncBtn = document.getElementById('sync-btn');
     if (syncBtn) {
         syncBtn.addEventListener('click', async () => {
@@ -193,7 +261,6 @@ function initAdminButtons() {
         });
     }
     
-    // Обновить данные
     const refreshBtn = document.getElementById('refresh-btn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', async () => {
@@ -202,19 +269,19 @@ function initAdminButtons() {
         });
     }
     
-    // Сбросить сегодня
     const resetBtn = document.getElementById('reset-btn');
     if (resetBtn) {
         resetBtn.addEventListener('click', async () => {
-            const result = await db.adminResetBookings();
-            if (result.success) {
-                await loadData();
-                showNotification('Сегодняшние брони сброшены', 'success');
+            if (confirm('⚠️ Сбросить ВСЕ сегодняшние брони?\n\nЭто действие нельзя отменить!')) {
+                const result = await db.adminResetBookings();
+                if (result.success) {
+                    await loadData();
+                    showNotification('Сегодняшние брони сброшены', 'success');
+                }
             }
         });
     }
     
-    // Экспорт
     const exportBtn = document.getElementById('export-btn');
     if (exportBtn) {
         exportBtn.addEventListener('click', async () => {
@@ -223,7 +290,6 @@ function initAdminButtons() {
         });
     }
     
-    // Просмотр localStorage
     const viewLocalBtn = document.getElementById('view-local-btn');
     if (viewLocalBtn) {
         viewLocalBtn.addEventListener('click', () => {
@@ -246,21 +312,46 @@ function initAdminButtons() {
     }
 }
 
+// ===== ИНИЦИАЛИЗАЦИЯ =====
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log('🚀 JAVATEAM Website Started');
+    
+    try {
+        // Инициализация скрытой админки
+        initHiddenAdmin();
+        
+        // Инициализация основных функций
+        initMenu();
+        initPrakiBookingSystem();
+        initOtherElements();
+        initHistory();
+        
+        // Загружаем данные
+        await loadData();
+        
+        // Добавляем CSS для админки
+        addAdminStyles();
+        
+        console.log('✅ Все системы запущены');
+        
+    } catch (error) {
+        console.error('❌ Ошибка запуска:', error);
+        showNotification('Ошибка загрузки сайта', 'error');
+    }
+});
+
 // ===== ЗАГРУЗКА ДАННЫХ =====
 async function loadData() {
     console.log('📥 Loading data...');
     showNotification('Загрузка данных...', 'info');
     
     try {
-        // Загружаем брони с GitHub
         bookings = await db.getBookings();
         console.log('📅 Bookings from GitHub:', bookings.length);
         
-        // Загружаем брони из localStorage (временные)
         const localBookings = db.getFromLocalStorage();
         console.log('💾 Local bookings:', localBookings.length);
         
-        // Объединяем (убираем дубликаты)
         const allBookings = [...bookings];
         localBookings.forEach(local => {
             if (!allBookings.some(g => g.id === local.id)) {
@@ -272,14 +363,12 @@ async function loadData() {
         updateBookingsDisplay();
         updateTimeSlotsFromBookings();
         
-        // Загружаем историю игр
         gamesHistory = await db.getGames();
         console.log('🎮 Games history:', gamesHistory.length);
         renderGamesTable();
         updateStats();
         updateInfoStats();
         
-        // Обновляем админ статистику
         updateAdminStats();
         
         showNotification('✅ Данные загружены!', 'success');
@@ -294,17 +383,14 @@ async function loadData() {
 
 // ===== ОБНОВИТЬ СТАТИСТИКУ АДМИНА =====
 function updateAdminStats() {
-    // Сегодняшние брони
     const today = new Date().toISOString().split('T')[0];
     const todayBookings = bookings.filter(b => b.bookingDate === today);
     const adminTodayBookings = document.getElementById('admin-today-bookings');
     if (adminTodayBookings) adminTodayBookings.textContent = todayBookings.length;
     
-    // Всего игр
     const adminTotalGames = document.getElementById('admin-total-games');
     if (adminTotalGames) adminTotalGames.textContent = gamesHistory.length;
     
-    // LocalStorage
     const localBookings = db.getFromLocalStorage();
     const adminLocalBookings = document.getElementById('admin-local-bookings');
     if (adminLocalBookings) adminLocalBookings.textContent = localBookings.length;
@@ -322,14 +408,6 @@ function initMenu() {
             openPage(pageId);
         });
     });
-    
-    const logo = document.querySelector('.logo');
-    if (logo) {
-        logo.addEventListener('click', function(e) {
-            e.preventDefault();
-            openPage('info');
-        });
-    }
 }
 
 function openPage(pageId) {
@@ -492,17 +570,10 @@ async function createBooking() {
     try {
         const result = await db.addBooking(booking);
         
-        // Добавляем в локальный список
         bookings.push(result);
-        
-        // Обновляем отображение
         updateBookingsDisplay();
         updateTimeSlotStatus(selectedTimeSlot, 'booked', teamName);
-        
-        // Обновляем админ статистику
         updateAdminStats();
-        
-        // Сбрасываем форму
         resetPrakiForm();
         
     } catch (error) {
@@ -751,7 +822,6 @@ function filterGames() {
 
 // ===== ИНИЦИАЛИЗАЦИЯ ДРУГИХ ЭЛЕМЕНТОВ =====
 function initOtherElements() {
-    // Кнопка присоединения на главной
     const joinBtn = document.querySelector('.info-join-btn');
     if (joinBtn) {
         joinBtn.addEventListener('click', function() {
@@ -759,7 +829,6 @@ function initOtherElements() {
         });
     }
     
-    // Статистика членов команды
     initMemberCards();
 }
 
@@ -785,13 +854,9 @@ function initMemberCards() {
 
 // ===== УВЕДОМЛЕНИЯ =====
 function showNotification(message, type = 'info') {
-    // Удаляем старые уведомления
     const oldNotification = document.querySelector('.notification');
-    if (oldNotification) {
-        oldNotification.remove();
-    }
+    if (oldNotification) oldNotification.remove();
     
-    // Создаем новое уведомление
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.innerHTML = `
@@ -802,18 +867,13 @@ function showNotification(message, type = 'info') {
     
     document.body.appendChild(notification);
     
-    // Анимация появления
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 10);
+    setTimeout(() => notification.classList.add('show'), 10);
     
-    // Кнопка закрытия
     notification.querySelector('.notification-close').addEventListener('click', function() {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 300);
     });
     
-    // Автоматическое закрытие
     setTimeout(() => {
         if (notification.parentNode) {
             notification.classList.remove('show');
@@ -822,15 +882,105 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-// ===== CSS для уведомлений =====
-function addNotificationStyles() {
+// ===== CSS ДЛЯ АДМИНКИ И УВЕДОМЛЕНИЙ =====
+function addAdminStyles() {
     const style = document.createElement('style');
     style.textContent = `
+        /* Скрытая админка */
+        .admin-password-input {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .admin-password-input.show {
+            opacity: 1;
+        }
+        
+        .password-container {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid #ffd700;
+            text-align: center;
+            min-width: 320px;
+        }
+        
+        .password-header {
+            color: #ffd700;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        #admin-password {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid #0099ff;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        #admin-password:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 15px rgba(0,255,136,0.3);
+        }
+        
+        #submit-password {
+            background: linear-gradient(90deg, #0099ff, #00ff88);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        #submit-password:hover {
+            transform: scale(1.05);
+        }
+        
+        .password-hint {
+            margin-top: 15px;
+            color: #888;
+            font-size: 12px;
+            font-style: italic;
+        }
+        
+        /* Уведомления */
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: var(--dark-color);
+            background: #1a1a2e;
             color: white;
             padding: 15px 20px;
             border-radius: 8px;
@@ -840,7 +990,7 @@ function addNotificationStyles() {
             gap: 12px;
             transform: translateX(120%);
             transition: transform 0.3s ease;
-            z-index: 1000;
+            z-index: 9998;
             border-left: 4px solid #00ff88;
             max-width: 400px;
         }
@@ -859,6 +1009,10 @@ function addNotificationStyles() {
         
         .notification.info {
             border-left-color: #0099ff;
+        }
+        
+        .notification i {
+            font-size: 20px;
         }
         
         .notification i.fa-check-circle {
@@ -889,49 +1043,5 @@ function addNotificationStyles() {
     `;
     document.head.appendChild(style);
 }
-
-// Добавляем стили при загрузке
-addNotificationStyles();
-
-// ===== АНИМАЦИЯ СЧЕТЧИКОВ =====
-function initCounters() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const counter = entry.target;
-                const target = +counter.getAttribute('data-target');
-                const duration = 1000;
-                let start = 0;
-                
-                const updateCounter = () => {
-                    const increment = target / (duration / 16);
-                    start += increment;
-                    
-                    if (start < target) {
-                        counter.textContent = Math.floor(start);
-                        setTimeout(updateCounter, 16);
-                    } else {
-                        counter.textContent = target;
-                    }
-                };
-                
-                updateCounter();
-                observer.unobserve(counter);
-            }
-        });
-    });
-    
-    document.querySelectorAll('.stat-number').forEach(counter => {
-        observer.observe(counter);
-    });
-}
-
-// ===== РЕСИВЕР ДЛЯ ВНЕШНИХ СООБЩЕНИЙ =====
-window.addEventListener('message', function(event) {
-    if (event.data.type === 'refreshData') {
-        loadData();
-        showNotification('Данные обновлены', 'success');
-    }
-});
 
 console.log('✅ JAVATEAM UI Ready!');
