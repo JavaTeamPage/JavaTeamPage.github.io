@@ -1,5 +1,5 @@
 // ui.js - ПОЛНАЯ РАБОЧАЯ ВЕРСИЯ
-console.log('UI.js loading...');
+console.log('🎮 JAVATEAM UI Initializing...');
 
 // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
 let currentPage = 'info';
@@ -9,41 +9,280 @@ let selectedTimeSlot = null;
 
 // ===== ИНИЦИАЛИЗАЦИЯ =====
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🎮 JAVATEAM Website Initialized');
+    console.log('🚀 JAVATEAM Website Started');
     
     try {
+        // Показываем админ панель
+        showAdminPanel();
+        
+        // Инициализация
         initMenu();
         initPrakiBookingSystem();
         initOtherElements();
         initHistory();
         
+        // Загружаем данные
         await loadData();
         
-        console.log('✅ Все инициализировано');
+        console.log('✅ Все системы запущены');
         
     } catch (error) {
-        console.error('❌ Ошибка инициализации:', error);
+        console.error('❌ Ошибка запуска:', error);
         showNotification('Ошибка загрузки сайта', 'error');
     }
 });
 
+// ===== ПОКАЗАТЬ АДМИН ПАНЕЛЬ =====
+function showAdminPanel() {
+    // Находим или создаем кнопку админа
+    let adminBtn = document.querySelector('.admin-panel-btn');
+    
+    if (!adminBtn) {
+        // Создаем кнопку админа
+        const menu = document.querySelector('.menu');
+        if (menu) {
+            adminBtn = document.createElement('button');
+            adminBtn.className = 'menu-btn admin-panel-btn';
+            adminBtn.setAttribute('data-page', 'admin');
+            adminBtn.innerHTML = `
+                <div class="menu-icon">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <span>АДМИН</span>
+            `;
+            menu.appendChild(adminBtn);
+            
+            // Добавляем обработчик
+            adminBtn.addEventListener('click', function() {
+                openPage('admin');
+            });
+        }
+    }
+    
+    // Показываем кнопку
+    if (adminBtn) {
+        adminBtn.style.display = 'flex';
+    }
+    
+    // Создаем страницу админа если её нет
+    createAdminPage();
+}
+
+// ===== СОЗДАТЬ СТРАНИЦУ АДМИНА =====
+function createAdminPage() {
+    if (document.getElementById('admin')) return;
+    
+    const adminHTML = `
+    <section class="page-block" id="admin">
+        <div class="admin-container">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <div class="section-title-bg">АДМИН</div>
+                    <h2 class="section-title">ПАНЕЛЬ УПРАВЛЕНИЯ</h2>
+                </div>
+                <div class="section-subtitle">Управление бронированиями и играми</div>
+                <div class="section-line"></div>
+            </div>
+
+            <div class="admin-panel">
+                <!-- СТАТИСТИКА -->
+                <div class="admin-section">
+                    <h3><i class="fas fa-chart-bar"></i> СТАТИСТИКА</h3>
+                    <div class="admin-stats">
+                        <div class="admin-stat">
+                            <div class="stat-label">Сегодняшних броней</div>
+                            <div class="stat-value" id="admin-today-bookings">0</div>
+                        </div>
+                        <div class="admin-stat">
+                            <div class="stat-label">Всего игр</div>
+                            <div class="stat-value" id="admin-total-games">0</div>
+                        </div>
+                        <div class="admin-stat">
+                            <div class="stat-label">В localStorage</div>
+                            <div class="stat-value" id="admin-local-bookings">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- СИНХРОНИЗАЦИЯ -->
+                <div class="admin-section">
+                    <h3><i class="fas fa-sync-alt"></i> СИНХРОНИЗАЦИЯ</h3>
+                    <div class="admin-actions">
+                        <button class="admin-btn" id="sync-btn">
+                            <i class="fas fa-sync"></i>
+                            Синхронизировать брони
+                        </button>
+                        <button class="admin-btn" id="refresh-btn">
+                            <i class="fas fa-redo"></i>
+                            Обновить данные
+                        </button>
+                    </div>
+                </div>
+
+                <!-- УПРАВЛЕНИЕ -->
+                <div class="admin-section">
+                    <h3><i class="fas fa-tools"></i> УПРАВЛЕНИЕ</h3>
+                    <div class="admin-actions">
+                        <button class="admin-btn" onclick="openPage('praki')">
+                            <i class="fas fa-plus"></i>
+                            Добавить бронь
+                        </button>
+                        <button class="admin-btn" onclick="document.getElementById('add-game-btn').click()">
+                            <i class="fas fa-gamepad"></i>
+                            Добавить игру
+                        </button>
+                        <button class="admin-btn danger-btn" id="reset-btn">
+                            <i class="fas fa-trash"></i>
+                            Сбросить сегодня
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ЭКСПОРТ -->
+                <div class="admin-section">
+                    <h3><i class="fas fa-download"></i> ЭКСПОРТ</h3>
+                    <div class="admin-actions">
+                        <button class="admin-btn" id="export-btn">
+                            <i class="fas fa-file-export"></i>
+                            Экспорт данных
+                        </button>
+                        <button class="admin-btn" id="view-local-btn">
+                            <i class="fas fa-database"></i>
+                            Просмотр localStorage
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ИНФОРМАЦИЯ -->
+                <div class="admin-section">
+                    <h3><i class="fas fa-info-circle"></i> ИНФОРМАЦИЯ</h3>
+                    <div class="admin-info">
+                        <p><strong>Текущая проблема:</strong> Брони сохраняются только в localStorage браузера.</p>
+                        <p><strong>Решение:</strong> Админ должен вручную синхронизировать данные между пользователями.</p>
+                        <p><strong>Инструкция:</strong></p>
+                        <ol>
+                            <li>Игрок создает бронь → сохраняется в ЕГО браузере</li>
+                            <li>Игрок сообщает ID брони админу</li>
+                            <li>Админ добавляет бронь через панель</li>
+                            <li>Все видят обновленные данные</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>`;
+    
+    // Добавляем в page-content
+    const pageContent = document.querySelector('.page-content');
+    if (pageContent) {
+        pageContent.insertAdjacentHTML('beforeend', adminHTML);
+        
+        // Инициализируем кнопки админа
+        setTimeout(initAdminButtons, 100);
+    }
+}
+
+// ===== ИНИЦИАЛИЗАЦИЯ КНОПОК АДМИНА =====
+function initAdminButtons() {
+    // Синхронизация
+    const syncBtn = document.getElementById('sync-btn');
+    if (syncBtn) {
+        syncBtn.addEventListener('click', async () => {
+            const result = await db.syncLocalWithGitHub();
+            showNotification(result.message, 'success');
+        });
+    }
+    
+    // Обновить данные
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', async () => {
+            await loadData();
+            showNotification('Данные обновлены', 'success');
+        });
+    }
+    
+    // Сбросить сегодня
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', async () => {
+            const result = await db.adminResetBookings();
+            if (result.success) {
+                await loadData();
+                showNotification('Сегодняшние брони сброшены', 'success');
+            }
+        });
+    }
+    
+    // Экспорт
+    const exportBtn = document.getElementById('export-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async () => {
+            await db.adminExportData();
+            showNotification('Данные экспортированы', 'success');
+        });
+    }
+    
+    // Просмотр localStorage
+    const viewLocalBtn = document.getElementById('view-local-btn');
+    if (viewLocalBtn) {
+        viewLocalBtn.addEventListener('click', () => {
+            const localBookings = db.getFromLocalStorage();
+            const today = new Date().toISOString().split('T')[0];
+            
+            let message = `📋 Брони в localStorage (${today}):\n\n`;
+            
+            if (localBookings.length === 0) {
+                message += 'Нет броней в localStorage';
+            } else {
+                localBookings.forEach((b, i) => {
+                    message += `${i+1}. ${b.teamName} - ${b.time} (ID: ${b.id})\n`;
+                });
+                message += `\nВсего: ${localBookings.length} броней`;
+            }
+            
+            alert(message);
+        });
+    }
+}
+
 // ===== ЗАГРУЗКА ДАННЫХ =====
 async function loadData() {
-    console.log('Loading data...');
+    console.log('📥 Loading data...');
+    showNotification('Загрузка данных...', 'info');
     
     try {
+        // Загружаем брони с GitHub
         bookings = await db.getBookings();
-        console.log('Bookings loaded:', bookings.length);
+        console.log('📅 Bookings from GitHub:', bookings.length);
+        
+        // Загружаем брони из localStorage (временные)
+        const localBookings = db.getFromLocalStorage();
+        console.log('💾 Local bookings:', localBookings.length);
+        
+        // Объединяем (убираем дубликаты)
+        const allBookings = [...bookings];
+        localBookings.forEach(local => {
+            if (!allBookings.some(g => g.id === local.id)) {
+                allBookings.push({...local, isLocal: true});
+            }
+        });
+        
+        bookings = allBookings;
         updateBookingsDisplay();
         updateTimeSlotsFromBookings();
         
+        // Загружаем историю игр
         gamesHistory = await db.getGames();
-        console.log('Games loaded:', gamesHistory.length);
+        console.log('🎮 Games history:', gamesHistory.length);
         renderGamesTable();
         updateStats();
         updateInfoStats();
         
-        showNotification('Данные загружены!', 'success');
+        // Обновляем админ статистику
+        updateAdminStats();
+        
+        showNotification('✅ Данные загружены!', 'success');
         
     } catch (error) {
         console.error('❌ Ошибка загрузки данных:', error);
@@ -53,7 +292,22 @@ async function loadData() {
     }
 }
 
-// ===== МЕНЮ =====
+// ===== ОБНОВИТЬ СТАТИСТИКУ АДМИНА =====
+function updateAdminStats() {
+    // Сегодняшние брони
+    const today = new Date().toISOString().split('T')[0];
+    const todayBookings = bookings.filter(b => b.bookingDate === today);
+    document.getElementById('admin-today-bookings').textContent = todayBookings.length;
+    
+    // Всего игр
+    document.getElementById('admin-total-games').textContent = gamesHistory.length;
+    
+    // LocalStorage
+    const localBookings = db.getFromLocalStorage();
+    document.getElementById('admin-local-bookings').textContent = localBookings.length;
+}
+
+// ===== МЕНЮ И ПЕРЕКЛЮЧЕНИЕ СТРАНИЦ =====
 function initMenu() {
     const menuButtons = document.querySelectorAll('.menu-btn');
     updateActiveMenuButton('info');
@@ -91,6 +345,7 @@ function openPage(pageId) {
             
             if (pageId === 'info') updateInfoStats();
             if (pageId === 'praki') updateBookingsDisplay();
+            if (pageId === 'admin') updateAdminStats();
             
         }, 300);
     }
@@ -147,7 +402,7 @@ function initPrakiBookingSystem() {
             const isBooked = this.querySelector('.time-status').classList.contains('booked');
             
             if (isBooked) {
-                showNotification(`Время ${time} уже занято`, 'error');
+                showNotification(`Время ${time} уже занято!`, 'error');
                 return;
             }
             
@@ -180,7 +435,9 @@ function initPrakiBookingSystem() {
 
 function validatePrakiBookingForm() {
     let isValid = true;
-    document.querySelectorAll('.form-input[required]').forEach(input => {
+    const requiredInputs = document.querySelectorAll('.form-input[required]');
+    
+    requiredInputs.forEach(input => {
         if (!input.value.trim()) {
             input.style.borderColor = 'var(--danger-color)';
             isValid = false;
@@ -190,12 +447,13 @@ function validatePrakiBookingForm() {
     });
     
     if (!selectedTimeSlot) {
-        showNotification('Выберите время', 'error');
+        showNotification('Выберите время для бронирования', 'error');
         isValid = false;
     }
     
-    if (document.querySelectorAll('.map-btn.active').length === 0) {
-        showNotification('Выберите карты', 'error');
+    const selectedMaps = document.querySelectorAll('.map-btn.active');
+    if (selectedMaps.length === 0) {
+        showNotification('Выберите хотя бы одну карту', 'error');
         isValid = false;
     }
     
@@ -224,22 +482,35 @@ async function createBooking() {
     
     try {
         const result = await db.addBooking(booking);
+        
+        // Добавляем в локальный список
         bookings.push(result);
+        
+        // Обновляем отображение
         updateBookingsDisplay();
         updateTimeSlotStatus(selectedTimeSlot, 'booked', teamName);
-        showNotification(`Бронь ${selectedTimeSlot} для ${teamName} создана!`, 'success');
+        
+        // Обновляем админ статистику
+        updateAdminStats();
+        
+        // Сбрасываем форму
         resetPrakiForm();
+        
     } catch (error) {
         showNotification(error.message, 'error');
     }
 }
 
 function resetPrakiForm() {
-    document.querySelectorAll('.map-btn.active').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.map-btn.active').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
     document.querySelectorAll('.form-input').forEach(input => {
         input.value = '';
         input.style.borderColor = '';
     });
+    
     selectedTimeSlot = null;
     document.querySelectorAll('.time-slot').forEach(slot => {
         slot.classList.remove('selected');
@@ -271,8 +542,11 @@ function updateTimeSlotsFromBookings() {
         updateTimeSlotStatus(time, 'available');
     });
     
+    const today = new Date().toISOString().split('T')[0];
     bookings.forEach(booking => {
-        updateTimeSlotStatus(booking.time, 'booked', booking.teamName);
+        if (booking.bookingDate === today) {
+            updateTimeSlotStatus(booking.time, 'booked', booking.teamName);
+        }
     });
 }
 
@@ -283,24 +557,28 @@ function updateBookingsDisplay() {
     if (!tbody) return;
     tbody.innerHTML = '';
     
-    if (bookings.length === 0) {
+    const today = new Date().toISOString().split('T')[0];
+    const todayBookings = bookings.filter(b => b.bookingDate === today);
+    
+    if (todayBookings.length === 0) {
         if (noBookingsMessage) noBookingsMessage.style.display = 'block';
         return;
     }
     
     if (noBookingsMessage) noBookingsMessage.style.display = 'none';
     
-    const sortedBookings = [...bookings].sort((a, b) => {
+    const sortedBookings = todayBookings.sort((a, b) => {
         return parseInt(a.time.split(':')[0]) - parseInt(b.time.split(':')[0]);
     });
     
     sortedBookings.forEach(booking => {
         const row = document.createElement('tr');
         const formattedDate = new Date(booking.bookingDate).toLocaleDateString('ru-RU');
+        const isLocal = booking.isLocal ? ' ⚠️ (локально)' : '';
         
         row.innerHTML = `
             <td><strong class="booking-time">${booking.time}</strong></td>
-            <td><strong>${booking.teamName}</strong></td>
+            <td><strong>${booking.teamName}${isLocal}</strong></td>
             <td>${booking.captainName}</td>
             <td>${Array.isArray(booking.teamRoster) ? booking.teamRoster.join(', ') : booking.teamRoster}</td>
             <td>${Array.isArray(booking.maps) ? booking.maps.join(', ') : booking.maps}</td>
@@ -311,7 +589,7 @@ function updateBookingsDisplay() {
     });
 }
 
-// ===== ИСТОРИЯ =====
+// ===== ИСТОРИЯ ИГР =====
 function initHistory() {
     renderGamesTable();
     updateStats();
@@ -359,18 +637,26 @@ function updateStats() {
     const losses = gamesHistory.filter(game => game.result === 'loss').length;
     const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
     
-    document.getElementById('total-games').textContent = totalGames;
-    document.getElementById('wins').textContent = wins;
-    document.getElementById('losses').textContent = losses;
-    document.getElementById('win-rate').textContent = `${winRate}%`;
+    const totalGamesEl = document.getElementById('total-games');
+    const winsEl = document.getElementById('wins');
+    const lossesEl = document.getElementById('losses');
+    const winRateEl = document.getElementById('win-rate');
+    
+    if (totalGamesEl) totalGamesEl.textContent = totalGames;
+    if (winsEl) winsEl.textContent = wins;
+    if (lossesEl) lossesEl.textContent = losses;
+    if (winRateEl) winRateEl.textContent = `${winRate}%`;
 }
 
 function updateInfoStats() {
     const totalGames = gamesHistory.length;
     const wins = gamesHistory.filter(game => game.result === 'win').length;
     
-    document.getElementById('info-total-games').textContent = totalGames;
-    document.getElementById('info-wins').textContent = wins;
+    const totalGamesEl = document.getElementById('info-total-games');
+    const winsEl = document.getElementById('info-wins');
+    
+    if (totalGamesEl) totalGamesEl.textContent = totalGames;
+    if (winsEl) winsEl.textContent = wins;
 }
 
 function initFilters() {
@@ -394,9 +680,15 @@ function filterGames() {
         let startDate;
         
         switch(dateValue) {
-            case 'week': startDate = new Date(now.setDate(now.getDate() - 7)); break;
-            case 'month': startDate = new Date(now.setMonth(now.getMonth() - 1)); break;
-            case 'year': startDate = new Date(now.setFullYear(now.getFullYear() - 1)); break;
+            case 'week':
+                startDate = new Date(now.setDate(now.getDate() - 7));
+                break;
+            case 'month':
+                startDate = new Date(now.setMonth(now.getMonth() - 1));
+                break;
+            case 'year':
+                startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+                break;
         }
         
         filteredGames = filteredGames.filter(game => new Date(game.date) >= startDate);
@@ -414,7 +706,8 @@ function filterGames() {
         const row = document.createElement('tr');
         const formattedDate = new Date(game.date).toLocaleDateString('ru-RU');
         const resultClass = game.result;
-        const resultText = game.result === 'win' ? 'Победа' : game.result === 'loss' ? 'Поражение' : 'Ничья';
+        const resultText = game.result === 'win' ? 'Победа' : 
+                          game.result === 'loss' ? 'Поражение' : 'Ничья';
         
         row.innerHTML = `
             <td>${formattedDate}</td>
@@ -462,142 +755,4 @@ function initModal() {
             
             const gameData = {
                 date: document.getElementById('game-date').value,
-                opponent: document.getElementById('opponent').value,
-                result: document.getElementById('result').value,
-                score: document.getElementById('score').value,
-                team: document.getElementById('team').value.split(',').map(name => name.trim()),
-                comment: document.getElementById('comment').value
-            };
-            
-            try {
-                const result = await db.addGame(gameData);
-                gamesHistory.push(result);
-                renderGamesTable();
-                updateStats();
-                updateInfoStats();
-                closeModal();
-                showNotification('Игра добавлена!', 'success');
-            } catch (error) {
-                showNotification('Ошибка: ' + error.message, 'error');
-            }
-        });
-    }
-}
-
-// ===== ДРУГИЕ ЭЛЕМЕНТЫ =====
-function initOtherElements() {
-    const joinBtn = document.querySelector('.info-join-btn');
-    if (joinBtn) {
-        joinBtn.addEventListener('click', function() {
-            openPage('praki');
-            showNotification('Забронируйте время для праков', 'info');
-        });
-    }
-    
-    document.querySelectorAll('.member-card').forEach(card => {
-        card.addEventListener('click', function() {
-            const player = this.getAttribute('data-player');
-            const playerInfo = {
-                'v3k': 'V3k - Капитан команды',
-                'paradox': 'Paradox - Люркер',
-                'maybe': 'Maybe? - Снайпер',
-                'blast': 'Blast - Рифлер',
-                'snowy': 'Snowy - Опенфрагер',
-                'pastic': 'Pastic - Тренер',
-                'exlusev': 'exluseV - Рекрут'
-            }[player] || 'Игрок JAVATEAM';
-            showNotification(playerInfo, 'info');
-        });
-    });
-    
-    document.querySelectorAll('.social-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            if (href && href !== '#') {
-                window.open(href, '_blank');
-            } else {
-                e.preventDefault();
-                showNotification('Ссылка недоступна', 'info');
-            }
-        });
-    });
-}
-
-// ===== УВЕДОМЛЕНИЯ =====
-function showNotification(message, type = 'info') {
-    const oldNotification = document.querySelector('.notification');
-    if (oldNotification) oldNotification.remove();
-    
-    let icon = 'fa-info-circle';
-    let color = '#ffd700';
-    
-    switch(type) {
-        case 'success': icon = 'fa-check-circle'; color = '#00ff88'; break;
-        case 'error': icon = 'fa-times-circle'; color = '#ff4757'; break;
-        case 'info': icon = 'fa-info-circle'; color = '#0099ff'; break;
-    }
-    
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.innerHTML = `
-        <div class="notification-content">
-            <i class="fas ${icon}"></i>
-            <span>${message}</span>
-            <button class="notification-close"><i class="fas fa-times"></i></button>
-        </div>
-    `;
-    
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: rgba(20, 20, 20, 0.95);
-        border: 1px solid ${color};
-        border-radius: 10px;
-        padding: 15px 20px;
-        color: ${color};
-        font-family: "Exo 2", sans-serif;
-        font-size: 14px;
-        max-width: 350px;
-        transform: translateX(100%);
-        opacity: 0;
-        transition: all 0.3s ease;
-        z-index: 10000;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-        notification.style.opacity = '1';
-    }, 10);
-    
-    const closeBtn = notification.querySelector('.notification-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            notification.style.transform = 'translateX(100%)';
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 300);
-        });
-    }
-    
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.style.transform = 'translateX(100%)';
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 300);
-        }
-    }, 3000);
-}
-
-// ===== ЭКСПОРТ =====
-window.openPage = openPage;
-window.showNotification = showNotification;
-
-console.log('%c JAVATEAM - STANDOFF 2 ESPORTS TEAM', 'background: linear-gradient(90deg, #ffd700, #9d00ff); color: #000; font-size: 16px; font-weight: bold; padding: 10px; border-radius: 5px;');
-console.log('%c Добро пожаловать на наш сайт!', 'color: #ffd700; font-size: 14px;');
+               
