@@ -1,170 +1,267 @@
-// Данные
-let times = [];
-let bookings = [];
-let history = [];
-let selectedTime = '';
-
-// Загрузка
-document.addEventListener('DOMContentLoaded', function() {
-    loadData();
-    // Обновление каждые 2 секунды
-    setInterval(loadData, 2000);
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>JAVATEAM | Официальный сайт</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Мобильное меню -->
+    <div class="mobile-menu-toggle" id="mobileToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
     
-    // Кнопка отправки
-    document.querySelector('.btn-blue').onclick = function(e) {
-        e.preventDefault();
-        submitBooking();
-    };
-    
-    // Ограничение на карты (максимум 3)
-    document.querySelectorAll('.map-item input').forEach(cb => {
-        cb.addEventListener('change', function() {
-            let checked = document.querySelectorAll('.map-item input:checked').length;
-            if (checked > 3) {
-                this.checked = false;
-                alert('Можно выбрать только 3 карты');
-            }
-        });
-    });
-});
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <div class="mobile-logo">JAVATEAM</div>
+            <div class="mobile-close" id="mobileClose">✕</div>
+        </div>
+        <nav class="mobile-nav">
+            <a href="#home" class="mobile-nav-link">ГЛАВНАЯ</a>
+            <a href="#roster" class="mobile-nav-link">СОСТАВ</a>
+            <a href="#practices" class="mobile-nav-link">ПРАКИ</a>
+            <a href="#history" class="mobile-nav-link">ИСТОРИЯ</a>
+        </nav>
+        <div class="mobile-status">
+            <span>СТАТУС: <span class="online">ОНЛАЙН</span></span>
+        </div>
+    </div>
 
-// Загрузка данных
-function loadData() {
-    Promise.all([
-        fetch('http://localhost:8000/api/times').then(r => r.json()),
-        fetch('http://localhost:8000/api/bookings').then(r => r.json()),
-        fetch('http://localhost:8000/api/history').then(r => r.json())
-    ]).then(([t, b, h]) => {
-        times = t;
-        bookings = b;
-        history = h;
-        render();
-    }).catch(() => {
-        // Если сервер не доступен - показываем заглушку
-        document.getElementById('availableTimeBlock').innerHTML = 
-            '<div class="no-time">СЕРВЕР НЕ ДОСТУПЕН</div>';
-    });
-}
+    <!-- Шапка -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">JAVATEAM</div>
+                <div class="status">СТАТУС: <span class="online">ОНЛАЙН</span></div>
+            </div>
+            
+            <nav class="nav">
+                <a href="#home" class="nav-link active">ГЛАВНАЯ</a>
+                <a href="#roster" class="nav-link">СОСТАВ</a>
+                <a href="#practices" class="nav-link">ПРАКИ</a>
+                <a href="#history" class="nav-link">ИСТОРИЯ</a>
+            </nav>
+        </div>
+    </header>
 
-// Отрисовка
-function render() {
-    // Доступное время
-    let block = document.getElementById('availableTimeBlock');
-    if (block) {
-        // Время, которое еще не занято
-        let freeTimes = times.filter(t => !bookings.some(b => b.time === t));
-        
-        if (freeTimes.length === 0) {
-            block.innerHTML = '<div class="no-time">СЕГОДНЯ ПРАКОВ НЕТ</div>';
-        } else {
-            let html = '<div class="time-selector"><span class="time-label">ДОСТУПНОЕ ВРЕМЯ:</span>';
-            freeTimes.forEach(t => {
-                html += `<button class="time-btn ${selectedTime === t ? 'selected' : ''}" 
-                               onclick="selectTime('${t}')">${t}</button>`;
-            });
-            block.innerHTML = html + '</div>';
-        }
-    }
-    
-    // Забронированные праки
-    let list = document.getElementById('practiceList');
-    if (list) {
-        if (bookings.length === 0) {
-            list.innerHTML = '<div class="empty-state">Нет забронированных праков</div>';
-        } else {
-            list.innerHTML = bookings.map(b => `
-                <div class="practice-item confirmed">
-                    <div class="practice-time">${b.time}</div>
-                    <div class="practice-teams">JAVATEAM vs ${b.team}</div>
-                    <div class="practice-status confirmed">ПОДТВЕРЖДЕН</div>
+    <!-- ГЛАВНАЯ -->
+    <section id="home" class="section">
+        <div class="container">
+            <div class="home-grid">
+                <div class="home-info fade-in">
+                    <h1 class="home-title">JAVATEAM</h1>
+                    <p class="home-desc">STANDOFF 2 • ПРОФЕССИОНАЛЬНАЯ КОМАНДА</p>
+                    <button class="btn pulse" onclick="scrollToSection('practices')">ПОДАТЬ ЗАЯВКУ</button>
                 </div>
-            `).join('');
-        }
-    }
-    
-    // История
-    let histList = document.getElementById('historyList');
-    if (histList) {
-        if (history.length === 0) {
-            histList.innerHTML = '<div class="empty-state">История пуста</div>';
-        } else {
-            histList.innerHTML = history.map(h => `
-                <div class="history-item ${h.result}">
-                    <span class="history-type">ПРАК</span>
-                    <span class="history-opponent">VS ${h.opponent}</span>
-                    <span class="history-score">${h.score}</span>
-                    <span class="history-result">${h.result === 'win' ? 'ПОБЕДА' : 'ПОРАЖЕНИЕ'}</span>
+                
+                <!-- МАТЧ ЦЕНТР -->
+                <div class="match-center slide-in">
+                    <div class="match-header">
+                        <span>МАТЧ ЦЕНТР</span>
+                    </div>
+                    <div class="match-card" id="matchCenterCard">
+                        <div class="match-teams">
+                            <div class="team">JAVATEAM</div>
+                            <div class="vs">VS</div>
+                            <div class="team opponent" id="matchOpponent">—</div>
+                        </div>
+                        <div class="match-timer" id="matchTimer"></div>
+                        <div class="match-status" id="matchStatus">НЕТ БЛИЖАЙШИХ МАТЧЕЙ</div>
+                    </div>
                 </div>
-            `).join('');
-        }
-    }
-}
+            </div>
+        </div>
+    </section>
 
-// Выбор времени
-function selectTime(t) {
-    selectedTime = t;
-    document.querySelectorAll('.time-btn').forEach(btn => {
-        btn.classList.toggle('selected', btn.textContent === t);
-    });
-}
+    <!-- СОСТАВ -->
+    <section id="roster" class="section">
+        <div class="container">
+            <h2 class="section-title">СОСТАВ КОМАНДЫ</h2>
+            
+            <div class="roster-grid">
+                <!-- am5fost -->
+                <div class="player-card scale-in" style="animation-delay: 0.1s">
+                    <div class="player-name">am5fost</div>
+                    <div class="player-stats">
+                        <div class="player-stat">
+                            <span class="stat-label">K/D</span>
+                            <span class="stat-value">1.38</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">ЧАСЫ</span>
+                            <span class="stat-value">1071</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">ЗВАНИЕ</span>
+                            <span class="stat-value">LEGENDS</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- entry -->
+                <div class="player-card scale-in" style="animation-delay: 0.2s">
+                    <div class="player-name">entry</div>
+                    <div class="player-stats">
+                        <div class="player-stat">
+                            <span class="stat-label">K/D</span>
+                            <span class="stat-value">2.11</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">ЧАСЫ</span>
+                            <span class="stat-value">236</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">ЗВАНИЕ</span>
+                            <span class="stat-value">LEGENDS</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Huizy -->
+                <div class="player-card scale-in" style="animation-delay: 0.3s">
+                    <div class="player-name">Huizy</div>
+                    <div class="player-stats">
+                        <div class="player-stat">
+                            <span class="stat-label">K/D</span>
+                            <span class="stat-value">2.42</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">ЧАСЫ</span>
+                            <span class="stat-value">774</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">ЗВАНИЕ</span>
+                            <span class="stat-value">LEGENDS</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bloodaim -->
+                <div class="player-card scale-in" style="animation-delay: 0.4s">
+                    <div class="player-name">Bloodaim</div>
+                    <div class="player-stats">
+                        <div class="player-stat">
+                            <span class="stat-label">K/D</span>
+                            <span class="stat-value">3.54</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">ЧАСЫ</span>
+                            <span class="stat-value">421</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">ЗВАНИЕ</span>
+                            <span class="stat-value">LEGENDS</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- blast -->
+                <div class="player-card scale-in" style="animation-delay: 0.5s">
+                    <div class="player-name">blast</div>
+                    <div class="player-stats">
+                        <div class="player-stat">
+                            <span class="stat-label">K/D</span>
+                            <span class="stat-value">1.60</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">ЧАСЫ</span>
+                            <span class="stat-value">564</span>
+                        </div>
+                        <div class="player-stat">
+                            <span class="stat-label">ЗВАНИЕ</span>
+                            <span class="stat-value">LEGENDS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-// Отправка заявки
-function submitBooking() {
-    if (!selectedTime) {
-        alert('❌ Выберите время');
-        return;
-    }
-    
-    let team = document.getElementById('teamName').value;
-    let captain = document.getElementById('captainTag').value;
-    let captainId = document.getElementById('captainId').value;
-    let roster = document.getElementById('rosterPlayers').value;
-    
-    let maps = [];
-    document.querySelectorAll('.map-item input:checked').forEach(cb => maps.push(cb.value));
-    
-    if (!team) {
-        alert('❌ Введите название команды');
-        return;
-    }
-    
-    if (!captain || !captainId) {
-        alert('❌ Заполните контакты капитана');
-        return;
-    }
-    
-    if (maps.length === 0) {
-        alert('❌ Выберите карты (минимум 1)');
-        return;
-    }
-    
-    fetch('http://localhost:8000/new_booking', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            time: selectedTime,
-            team: team,
-            captain: captain,
-            captainId: captainId,
-            maps: maps,
-            roster: roster
-        })
-    }).then(() => {
-        alert('✅ Заявка отправлена');
-        // Очищаем форму
-        document.getElementById('teamName').value = '';
-        document.getElementById('captainTag').value = '';
-        document.getElementById('captainId').value = '';
-        document.getElementById('rosterPlayers').value = '';
-        document.querySelectorAll('.map-item input:checked').forEach(cb => cb.checked = false);
-        selectedTime = '';
-        loadData(); // Обновляем сразу
-    }).catch(() => {
-        alert('❌ Ошибка отправки');
-    });
-}
+    <!-- ПРАКИ -->
+    <section id="practices" class="section">
+        <div class="container">
+            <h2 class="section-title">ЗАПИСЬ НА ПРАК</h2>
+            
+            <div class="practices-grid">
+                <!-- Форма -->
+                <div class="practice-form slide-up">
+                    <h3 class="form-title">НОВАЯ ЗАЯВКА</h3>
+                    
+                    <!-- БЛОК С ДОСТУПНЫМ ВРЕМЕНЕМ -->
+                    <div class="available-time" id="availableTimeBlock">
+                        <div class="no-time">ЗАГРУЗКА...</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>НАЗВАНИЕ КОМАНДЫ</label>
+                        <input type="text" id="teamName" class="form-control" placeholder="AIRX TEAM" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>КАПИТАН (TELEGRAM)</label>
+                        <input type="text" id="captainTag" class="form-control" placeholder="@username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>ID КАПИТАНА</label>
+                        <input type="text" id="captainId" class="form-control" placeholder="12345678" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>ВЫБЕРИТЕ КАРТЫ (максимум 3)</label>
+                        <div class="maps-grid">
+                            <label class="map-item"><input type="checkbox" value="Sandstone"> Sandstone</label>
+                            <label class="map-item"><input type="checkbox" value="Rust"> Rust</label>
+                            <label class="map-item"><input type="checkbox" value="Dune"> Dune</label>
+                            <label class="map-item"><input type="checkbox" value="Province"> Province</label>
+                            <label class="map-item"><input type="checkbox" value="Breeze"> Breeze</label>
+                            <label class="map-item"><input type="checkbox" value="Zone 9"> Zone 9</label>
+                            <label class="map-item"><input type="checkbox" value="Hanami"> Hanami</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>СОСТАВ (5 игроков через запятую)</label>
+                        <input type="text" id="rosterPlayers" class="form-control" placeholder="nick1, nick2, nick3, nick4, nick5">
+                    </div>
+                    
+                    <button class="btn btn-blue btn-block" onclick="submitPractice()">ОТПРАВИТЬ ЗАЯВКУ</button>
+                </div>
+                
+                <!-- Забронированные праки -->
+                <div class="active-practices slide-up" style="animation-delay: 0.2s">
+                    <h3 class="form-title">ЗАБРОНИРОВАННЫЕ ПРАКИ</h3>
+                    <div id="practiceList" class="practice-list">
+                        <div class="empty-state">Загрузка...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-// Навигация
-function scrollToSection(id) {
-    document.getElementById(id).scrollIntoView({behavior: 'smooth'});
-}
+    <!-- ИСТОРИЯ МАТЧЕЙ -->
+    <section id="history" class="section">
+        <div class="container">
+            <h2 class="section-title">ИСТОРИЯ МАТЧЕЙ</h2>
+            <div id="historyList" class="history-list">
+                <div class="empty-state">Загрузка...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 JAVATEAM</p>
+            <div class="footer-social">
+                <a href="https://t.me/JavaTeamOffical" target="_blank" class="tg-link">TELEGRAM</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="ui.js"></script>
+</body>
+</html>
