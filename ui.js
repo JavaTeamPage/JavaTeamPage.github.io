@@ -1,7 +1,7 @@
 // Данные
-let availableTimes = [];      // Свободное время (из админки)
-let bookedPractices = [];     // Забронированные праки
-let historyMatches = [];      // История матчей
+let availableTimes = [];
+let bookedPractices = [];
+let historyMatches = [];
 let timerInterval = null;
 let selectedTime = '';
 
@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Загружаем данные с сервера
     loadData();
     
-    // Запускаем обновление каждые 10 секунд
-    setInterval(loadData, 10000);
+    // Запускаем обновление каждые 5 секунд
+    setInterval(loadData, 5000);
     
     activateSection('home');
     updateMatchCenter();
@@ -35,12 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function loadData() {
     console.log('[📡] Загружаем данные с сервера...');
     
-    // Загружаем доступное время (из админки)
+    // Загружаем доступное время
     fetch('http://localhost:8000/api/available_times')
-        .then(response => {
-            if (!response.ok) throw new Error('Сервер не отвечает');
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             console.log('[⏰] Доступное время:', data);
             availableTimes = data;
@@ -48,16 +45,11 @@ function loadData() {
         })
         .catch(error => {
             console.log('[❌] Ошибка загрузки времени:', error);
-            availableTimes = [];
-            renderAvailableTimes();
         });
     
     // Загружаем забронированные праки
     fetch('http://localhost:8000/api/booked')
-        .then(response => {
-            if (!response.ok) throw new Error('Сервер не отвечает');
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             console.log('[📋] Забронированные праки:', data);
             bookedPractices = data;
@@ -66,16 +58,11 @@ function loadData() {
         })
         .catch(error => {
             console.log('[❌] Ошибка загрузки праков:', error);
-            bookedPractices = [];
-            renderBookedPractices();
         });
     
     // Загружаем историю
     fetch('http://localhost:8000/api/history')
-        .then(response => {
-            if (!response.ok) throw new Error('Сервер не отвечает');
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             console.log('[📊] История:', data);
             historyMatches = data;
@@ -83,22 +70,15 @@ function loadData() {
         })
         .catch(error => {
             console.log('[❌] Ошибка загрузки истории:', error);
-            historyMatches = [];
-            renderHistory();
         });
 }
 
 // ===== ОТРИСОВКА ДОСТУПНОГО ВРЕМЕНИ =====
 function renderAvailableTimes() {
     const block = document.getElementById('availableTimeBlock');
-    if (!block) {
-        console.log('[❌] Блок availableTimeBlock не найден');
-        return;
-    }
+    if (!block) return;
     
-    console.log('[🎨] Отрисовка времени:', availableTimes);
-    
-    // Если нет времени или сервер не отвечает
+    // Если нет времени
     if (!availableTimes || availableTimes.length === 0) {
         block.innerHTML = `
             <div class="no-time">
@@ -108,10 +88,11 @@ function renderAvailableTimes() {
         return;
     }
     
+    // Создаем HTML для кнопок времени
     let html = '<div class="time-selector"><span class="time-label">ДОСТУПНОЕ ВРЕМЯ:</span>';
     
-    // Показываем только свободное время
     availableTimes.forEach(t => {
+        // Проверяем, не забронировано ли это время
         const isBooked = bookedPractices.some(b => b.time === t.time);
         if (!isBooked) {
             html += `<button class="time-btn" onclick="selectTime('${t.time}')">${t.time}</button>`;
@@ -160,11 +141,6 @@ function submitPractice() {
     const captainTag = document.getElementById('captainTag');
     const captainId = document.getElementById('captainId');
     const roster = document.getElementById('rosterPlayers');
-    
-    if (!team || !captainTag || !captainId || !roster) {
-        showNotification('❌ Ошибка формы', 'error');
-        return;
-    }
     
     const selectedMaps = [];
     document.querySelectorAll('.map-item input:checked').forEach(cb => {
@@ -219,8 +195,8 @@ function submitPractice() {
         showNotification('✅ Заявка отправлена!', 'success');
         clearForm();
         
-        // Перезагружаем данные
-        setTimeout(loadData, 1000);
+        // Сразу обновляем данные
+        setTimeout(loadData, 500);
     })
     .catch(error => {
         console.error('[❌] Ошибка:', error);
@@ -422,7 +398,6 @@ function showNotification(message, type) {
         font-weight: 500;
         box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         animation: slideIn 0.3s ease;
-        border: 1px solid rgba(255,255,255,0.1);
     `;
     notification.textContent = message;
     document.body.appendChild(notification);
