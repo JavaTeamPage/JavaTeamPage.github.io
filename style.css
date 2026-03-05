@@ -1,170 +1,1037 @@
-// Данные
-let times = [];
-let bookings = [];
-let history = [];
-let selectedTime = '';
-
-// Загрузка
-document.addEventListener('DOMContentLoaded', function() {
-    loadData();
-    // Обновление каждые 2 секунды
-    setInterval(loadData, 2000);
-    
-    // Кнопка отправки
-    document.querySelector('.btn-blue').onclick = function(e) {
-        e.preventDefault();
-        submitBooking();
-    };
-    
-    // Ограничение на карты (максимум 3)
-    document.querySelectorAll('.map-item input').forEach(cb => {
-        cb.addEventListener('change', function() {
-            let checked = document.querySelectorAll('.map-item input:checked').length;
-            if (checked > 3) {
-                this.checked = false;
-                alert('Можно выбрать только 3 карты');
-            }
-        });
-    });
-});
-
-// Загрузка данных
-function loadData() {
-    Promise.all([
-        fetch('http://localhost:8000/api/times').then(r => r.json()),
-        fetch('http://localhost:8000/api/bookings').then(r => r.json()),
-        fetch('http://localhost:8000/api/history').then(r => r.json())
-    ]).then(([t, b, h]) => {
-        times = t;
-        bookings = b;
-        history = h;
-        render();
-    }).catch(() => {
-        // Если сервер не доступен - показываем заглушку
-        document.getElementById('availableTimeBlock').innerHTML = 
-            '<div class="no-time">СЕРВЕР НЕ ДОСТУПЕН</div>';
-    });
+/* ОСНОВНЫЕ НАСТРОЙКИ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-// Отрисовка
-function render() {
-    // Доступное время
-    let block = document.getElementById('availableTimeBlock');
-    if (block) {
-        // Время, которое еще не занято
-        let freeTimes = times.filter(t => !bookings.some(b => b.time === t));
-        
-        if (freeTimes.length === 0) {
-            block.innerHTML = '<div class="no-time">СЕГОДНЯ ПРАКОВ НЕТ</div>';
-        } else {
-            let html = '<div class="time-selector"><span class="time-label">ДОСТУПНОЕ ВРЕМЯ:</span>';
-            freeTimes.forEach(t => {
-                html += `<button class="time-btn ${selectedTime === t ? 'selected' : ''}" 
-                               onclick="selectTime('${t}')">${t}</button>`;
-            });
-            block.innerHTML = html + '</div>';
-        }
+body {
+    background: #0a0a0a;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ========== АНИМАЦИИ ========== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
     }
-    
-    // Забронированные праки
-    let list = document.getElementById('practiceList');
-    if (list) {
-        if (bookings.length === 0) {
-            list.innerHTML = '<div class="empty-state">Нет забронированных праков</div>';
-        } else {
-            list.innerHTML = bookings.map(b => `
-                <div class="practice-item confirmed">
-                    <div class="practice-time">${b.time}</div>
-                    <div class="practice-teams">JAVATEAM vs ${b.team}</div>
-                    <div class="practice-status confirmed">ПОДТВЕРЖДЕН</div>
-                </div>
-            `).join('');
-        }
-    }
-    
-    // История
-    let histList = document.getElementById('historyList');
-    if (histList) {
-        if (history.length === 0) {
-            histList.innerHTML = '<div class="empty-state">История пуста</div>';
-        } else {
-            histList.innerHTML = history.map(h => `
-                <div class="history-item ${h.result}">
-                    <span class="history-type">ПРАК</span>
-                    <span class="history-opponent">VS ${h.opponent}</span>
-                    <span class="history-score">${h.score}</span>
-                    <span class="history-result">${h.result === 'win' ? 'ПОБЕДА' : 'ПОРАЖЕНИЕ'}</span>
-                </div>
-            `).join('');
-        }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-// Выбор времени
-function selectTime(t) {
-    selectedTime = t;
-    document.querySelectorAll('.time-btn').forEach(btn => {
-        btn.classList.toggle('selected', btn.textContent === t);
-    });
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
-// Отправка заявки
-function submitBooking() {
-    if (!selectedTime) {
-        alert('❌ Выберите время');
-        return;
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
     }
-    
-    let team = document.getElementById('teamName').value;
-    let captain = document.getElementById('captainTag').value;
-    let captainId = document.getElementById('captainId').value;
-    let roster = document.getElementById('rosterPlayers').value;
-    
-    let maps = [];
-    document.querySelectorAll('.map-item input:checked').forEach(cb => maps.push(cb.value));
-    
-    if (!team) {
-        alert('❌ Введите название команды');
-        return;
+    to {
+        opacity: 1;
+        transform: scale(1);
     }
-    
-    if (!captain || !captainId) {
-        alert('❌ Заполните контакты капитана');
-        return;
-    }
-    
-    if (maps.length === 0) {
-        alert('❌ Выберите карты (минимум 1)');
-        return;
-    }
-    
-    fetch('http://localhost:8000/new_booking', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            time: selectedTime,
-            team: team,
-            captain: captain,
-            captainId: captainId,
-            maps: maps,
-            roster: roster
-        })
-    }).then(() => {
-        alert('✅ Заявка отправлена');
-        // Очищаем форму
-        document.getElementById('teamName').value = '';
-        document.getElementById('captainTag').value = '';
-        document.getElementById('captainId').value = '';
-        document.getElementById('rosterPlayers').value = '';
-        document.querySelectorAll('.map-item input:checked').forEach(cb => cb.checked = false);
-        selectedTime = '';
-        loadData(); // Обновляем сразу
-    }).catch(() => {
-        alert('❌ Ошибка отправки');
-    });
 }
 
-// Навигация
-function scrollToSection(id) {
-    document.getElementById(id).scrollIntoView({behavior: 'smooth'});
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.fade-in {
+    animation: fadeIn 1s ease forwards;
+}
+
+.slide-up {
+    opacity: 0;
+    animation: slideUp 0.8s ease forwards;
+}
+
+.slide-in {
+    opacity: 0;
+    animation: slideIn 0.8s ease forwards;
+}
+
+.scale-in {
+    opacity: 0;
+    animation: scaleIn 0.6s ease forwards;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+/* ========== МОБИЛЬНОЕ МЕНЮ ========== */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 45px;
+    height: 45px;
+    background: #0066ff;
+    border-radius: 12px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,102,255,0.3);
+    transition: all 0.3s;
+}
+
+.mobile-menu-toggle span {
+    width: 24px;
+    height: 2px;
+    background: white;
+    transition: 0.3s;
+}
+
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 320px;
+    height: 100vh;
+    background: #111;
+    z-index: 1001;
+    padding: 25px;
+    transition: right 0.4s ease;
+    box-shadow: -5px 0 30px rgba(0,0,0,0.5);
+    border-left: 1px solid #333;
+}
+
+.mobile-menu.active {
+    right: 0;
+}
+
+.mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #333;
+}
+
+.mobile-logo {
+    font-size: 28px;
+    font-weight: 700;
+    color: #0066ff;
+}
+
+.mobile-close {
+    font-size: 32px;
+    cursor: pointer;
+    color: #888;
+    transition: all 0.3s;
+}
+
+.mobile-close:hover {
+    color: #0066ff;
+    transform: rotate(90deg);
+}
+
+.mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mobile-nav-link {
+    color: #fff;
+    text-decoration: none;
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-size: 18px;
+    transition: all 0.3s;
+    background: #1a1a1a;
+    border: 1px solid #333;
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link.active {
+    background: #0066ff;
+    transform: translateX(-10px);
+    border-color: #0066ff;
+}
+
+.mobile-status {
+    position: absolute;
+    bottom: 30px;
+    left: 25px;
+    right: 25px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    text-align: center;
+    color: #888;
+    border: 1px solid #333;
+}
+
+/* ========== ДЕСКТОПНАЯ ШАПКА ========== */
+.header {
+    padding: 30px 0;
+    border-bottom: 1px solid #1a1a1a;
+    background: #0a0a0a;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    background: rgba(10,10,10,0.95);
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+.status {
+    color: #888;
+    font-size: 14px;
+}
+
+.online {
+    color: #0066ff;
+    font-weight: 500;
+    animation: pulse 2s infinite;
+}
+
+.nav {
+    display: flex;
+    gap: 2px;
+    background: #111;
+    padding: 4px;
+    border-radius: 12px;
+}
+
+.nav-link {
+    color: #888;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: #fff;
+}
+
+.nav-link.active {
+    background: #0066ff;
+    color: white;
+}
+
+/* ========== СЕКЦИИ ========== */
+.section {
+    padding: 80px 0;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.section-title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 50px;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: #0066ff;
+    transition: width 0.3s ease;
+}
+
+.section-title:hover:after {
+    width: 100%;
+}
+
+/* ГЛАВНАЯ */
+.home-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+}
+
+.home-title {
+    font-size: 56px;
+    font-weight: 800;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #fff 0%, #888 50%, #0066ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.home-desc {
+    color: #888;
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.match-center {
+    background: #111;
+    border-radius: 24px;
+    padding: 30px;
+    transition: all 0.3s;
+    border: 1px solid #333;
+}
+
+.match-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    color: #888;
+    font-size: 14px;
+}
+
+.match-card {
+    text-align: center;
+}
+
+.match-teams {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.vs {
+    color: #888;
+    font-size: 18px;
+}
+
+.opponent {
+    color: #888;
+}
+
+.match-status {
+    color: #888;
+    font-size: 14px;
+    padding: 10px;
+    border-top: 1px solid #333;
+}
+
+/* СОСТАВ */
+.roster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.player-card {
+    background: #111;
+    border-radius: 20px;
+    padding: 30px;
+    transition: all 0.3s ease;
+    border: 1px solid #333;
+}
+
+.player-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: #0066ff;
+    box-shadow: 0 20px 30px rgba(0,102,255,0.3);
+}
+
+.player-name {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: #0066ff;
+}
+
+.player-stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.player-stat {
+    text-align: center;
+    flex: 1;
+    padding: 10px;
+    background: #1a1a1a;
+    border-radius: 12px;
+}
+
+.player-stat .stat-label {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.player-stat .stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+}
+
+/* ПРАКИ */
+.practices-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.practice-form,
+.active-practices {
+    background: #111;
+    border-radius: 24px;
+    padding: 35px;
+    transition: all 0.3s;
+    border: 1px solid #333;
+}
+
+.form-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: #0066ff;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 14px 18px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #0066ff;
+    box-shadow: 0 0 0 4px rgba(0,102,255,0.1);
+}
+
+.maps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.map-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ccc;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+}
+
+.map-item:hover {
+    background: #333;
+    color: #fff;
+    border-color: #0066ff;
+}
+
+.map-item input[type="checkbox"] {
+    accent-color: #0066ff;
+    width: 18px;
+    height: 18px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 14px 35px;
+    background: transparent;
+    border: 1px solid #333;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn:hover {
+    border-color: #0066ff;
+    color: #0066ff;
+    transform: translateY(-3px);
+}
+
+.btn-blue {
+    background: #0066ff;
+    border: none;
+    color: white;
+}
+
+.btn-blue:hover {
+    background: #0052cc;
+    color: white;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0,102,255,0.3);
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+.practice-list {
+    margin-top: 20px;
+}
+
+.practice-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px;
+    border-bottom: 1px solid #1a1a1a;
+    transition: all 0.3s;
+    border-radius: 12px;
+}
+
+.practice-item:hover {
+    background: #1a1a1a;
+    transform: translateX(10px);
+}
+
+.practice-item:last-child {
+    border-bottom: none;
+}
+
+.practice-time {
+    font-weight: 600;
+    color: #0066ff;
+    font-size: 16px;
+}
+
+.practice-teams {
+    color: #fff;
+    font-weight: 500;
+}
+
+.practice-status {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.practice-status.pending {
+    background: #1a1a1a;
+    color: #888;
+    border: 1px solid #333;
+}
+
+.practice-status.confirmed {
+    background: #0066ff;
+    color: white;
+}
+
+/* ИСТОРИЯ */
+.history-list {
+    background: #111;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.history-item {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px 100px;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #1a1a1a;
+    transition: 0.3s;
+}
+
+.history-item:hover {
+    background: #1a1a1a;
+    transform: translateX(10px);
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-item.win {
+    border-left: 3px solid #0066ff;
+}
+
+.history-item.loss {
+    border-left: 3px solid #888;
+}
+
+.history-type {
+    color: #888;
+    font-size: 12px;
+}
+
+.history-opponent {
+    font-weight: 500;
+}
+
+.history-score {
+    font-weight: 600;
+    color: #0066ff;
+}
+
+.history-result {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.history-item.win .history-result {
+    color: #0066ff;
+}
+
+.history-item.loss .history-result {
+    color: #888;
+}
+
+/* ПУСТЫЕ СОСТОЯНИЯ */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+    font-size: 14px;
+    border: 1px dashed #333;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+/* ФУТЕР */
+.footer {
+    padding: 50px 0;
+    text-align: center;
+    color: #888;
+    font-size: 12px;
+    position: relative;
+}
+
+.footer-social {
+    margin-top: 25px;
+}
+
+.tg-link {
+    color: #fff;
+    text-decoration: none;
+    padding: 14px 35px;
+    background: #0066ff;
+    border-radius: 12px;
+    transition: all 0.3s;
+    font-size: 16px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.tg-link:hover {
+    background: #0052cc;
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(0,102,255,0.4);
+}
+
+/* ========== МОБИЛЬНАЯ АДАПТАЦИЯ ========== */
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: flex;
+    }
+    
+    .header .nav {
+        display: none;
+    }
+    
+    .header {
+        padding: 20px 0;
+    }
+    
+    .header-top {
+        margin-right: 50px;
+    }
+    
+    .home-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .practices-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .practice-form, .active-practices {
+        padding: 25px;
+    }
+    
+    .roster-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .maps-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .section-title {
+        font-size: 28px;
+    }
+    
+    .home-title {
+        font-size: 36px;
+    }
+    
+    .history-item {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .history-type {
+        grid-column: 1 / -1;
+    }
+    
+    .btn, .btn-blue {
+        min-height: 50px;
+        font-size: 16px;
+    }
+    
+    .form-control, select, input {
+        min-height: 50px;
+        font-size: 16px;
+    }
+    
+    .btn-blue {
+        position: sticky;
+        bottom: 20px;
+        width: calc(100% - 40px);
+        margin: 20px auto;
+        padding: 16px !important;
+        font-size: 18px !important;
+        font-weight: bold;
+        box-shadow: 0 5px 20px rgba(0,102,255,0.5);
+        z-index: 99;
+    }
+    
+    .practice-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .practice-time {
+        font-size: 16px;
+    }
+    
+    .practice-teams {
+        font-size: 18px;
+    }
+    
+    .practice-status {
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .maps-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mobile-menu {
+        width: 100%;
+        max-width: none;
+    }
+    
+    .match-teams {
+        font-size: 22px;
+    }
+}
+/* БЛОК С ВРЕМЕНЕМ */
+.available-time {
+    margin-bottom: 25px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border-left: 3px solid #0066ff;
+}
+
+.time-selector {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.time-label {
+    font-size: 14px;
+    color: #888;
+    margin-right: 10px;
+}
+
+.time-btn {
+    background: #0a0a0a;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 80px;
+}
+
+.time-btn:hover {
+    border-color: #0066ff;
+    transform: scale(1.05);
+}
+
+.time-btn.selected {
+    background: #0066ff;
+    border-color: #0066ff;
+    color: white;
+}
+
+.no-time {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-size: 16px;
+    border: 1px dashed #333;
+    border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+    .time-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .time-btn {
+        width: 100%;
+    }
+}
+/* БЛОК С ВРЕМЕНЕМ */
+.available-time {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border-left: 4px solid #0066ff;
+}
+
+.time-selector {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+}
+
+.time-label {
+    font-size: 14px;
+    color: #888;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.time-btn {
+    background: #0a0a0a;
+    border: 2px solid #333;
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 100px;
+}
+
+.time-btn:hover {
+    border-color: #0066ff;
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,102,255,0.3);
+}
+
+.time-btn.selected {
+    background: #0066ff;
+    border-color: #0066ff;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0,102,255,0.5);
+}
+
+.no-time {
+    text-align: center;
+    padding: 25px;
+    color: #888;
+    font-size: 18px;
+    font-weight: 500;
+    border: 2px dashed #333;
+    border-radius: 10px;
+    background: #0f0f0f;
+}
+
+@media (max-width: 768px) {
+    .time-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .time-btn {
+        width: 100%;
+        padding: 15px;
+        font-size: 20px;
+    }
+    
+    .time-label {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+    
+    .no-time {
+        font-size: 16px;
+        padding: 20px;
+    }
+}
+/* БЛОК ВРЕМЕНИ */
+.available-time {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border-left: 4px solid #0066ff;
+}
+
+.time-selector {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+}
+
+.time-label {
+    font-size: 14px;
+    color: #888;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.time-btn {
+    background: #0a0a0a;
+    border: 2px solid #333;
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    min-width: 100px;
+}
+
+.time-btn:hover {
+    border-color: #0066ff;
+    transform: scale(1.05);
+}
+
+.time-btn.selected {
+    background: #0066ff;
+    border-color: #0066ff;
+    color: white;
+}
+
+.no-time {
+    text-align: center;
+    padding: 25px;
+    color: #888;
+    font-size: 18px;
+    border: 2px dashed #333;
+    border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+    .time-selector {
+        flex-direction: column;
+    }
+    .time-btn {
+        width: 100%;
+    }
+}
+/* Для карт */
+.map-item input:checked {
+    accent-color: #0066ff;
+}
+
+.map-item {
+    user-select: none;
+}
+
+/* Для кнопок времени */
+.time-btn {
+    transition: all 0.2s;
+}
+
+.time-btn.selected {
+    background: #0066ff !important;
+    border-color: #0066ff !important;
+    color: white;
+    transform: scale(1.05);
 }
