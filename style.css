@@ -1,4 +1,4 @@
-/* ОСНОВНЫЕ НАСТРОЙКИ */
+/* ========== ОСНОВНЫЕ НАСТРОЙКИ ========== */
 * {
     margin: 0;
     padding: 0;
@@ -290,7 +290,7 @@ body {
     width: 100%;
 }
 
-/* ГЛАВНАЯ */
+/* ========== ГЛАВНАЯ ========== */
 .home-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -313,6 +313,7 @@ body {
     margin-bottom: 30px;
 }
 
+/* МАТЧ ЦЕНТР */
 .match-center {
     background: #111;
     border-radius: 24px;
@@ -351,6 +352,15 @@ body {
     color: #888;
 }
 
+.match-timer {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0066ff;
+    margin: 15px 0;
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+
 .match-status {
     color: #888;
     font-size: 14px;
@@ -358,7 +368,12 @@ body {
     border-top: 1px solid #333;
 }
 
-/* СОСТАВ */
+#matchOpponent {
+    color: #0066ff;
+    font-weight: 700;
+}
+
+/* ========== СОСТАВ ========== */
 .roster-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -413,7 +428,7 @@ body {
     color: #fff;
 }
 
-/* ПРАКИ */
+/* ========== ПРАКИ ========== */
 .practices-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -466,6 +481,7 @@ body {
     box-shadow: 0 0 0 4px rgba(0,102,255,0.1);
 }
 
+/* КАРТЫ */
 .maps-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -500,6 +516,7 @@ body {
     height: 18px;
 }
 
+/* КНОПКИ */
 .btn {
     display: inline-block;
     padding: 14px 35px;
@@ -537,6 +554,63 @@ body {
     width: 100%;
 }
 
+/* ДОСТУПНОЕ ВРЕМЯ */
+.available-time {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    border-left: 4px solid #0066ff;
+}
+
+.time-selector {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+}
+
+.time-label {
+    font-size: 14px;
+    color: #888;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.time-btn {
+    background: #0a0a0a;
+    border: 2px solid #333;
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 100px;
+}
+
+.time-btn:hover {
+    border-color: #0066ff;
+    transform: scale(1.05);
+}
+
+.time-btn.selected {
+    background: #0066ff;
+    border-color: #0066ff;
+    color: white;
+}
+
+.no-time {
+    text-align: center;
+    padding: 25px;
+    color: #888;
+    font-size: 18px;
+    border: 2px dashed #333;
+    border-radius: 10px;
+}
+
+/* СПИСОК ПРАКОВ */
 .practice-list {
     margin-top: 20px;
 }
@@ -578,18 +652,12 @@ body {
     font-weight: 600;
 }
 
-.practice-status.pending {
-    background: #1a1a1a;
-    color: #888;
-    border: 1px solid #333;
-}
-
 .practice-status.confirmed {
     background: #0066ff;
     color: white;
 }
 
-/* ИСТОРИЯ */
+/* ========== ИСТОРИЯ ========== */
 .history-list {
     background: #111;
     border-radius: 16px;
@@ -660,7 +728,7 @@ body {
     margin: 20px 0;
 }
 
-/* ФУТЕР */
+/* ========== ФУТЕР ========== */
 .footer {
     padding: 50px 0;
     text-align: center;
@@ -709,18 +777,14 @@ body {
         margin-right: 50px;
     }
     
-    .home-grid {
+    .home-grid,
+    .practices-grid {
         grid-template-columns: 1fr;
         gap: 30px;
     }
     
-    .practices-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .practice-form, .active-practices {
-        padding: 25px;
+    .home-title {
+        font-size: 36px;
     }
     
     .roster-grid {
@@ -735,10 +799,6 @@ body {
         font-size: 28px;
     }
     
-    .home-title {
-        font-size: 36px;
-    }
-    
     .history-item {
         grid-template-columns: 1fr 1fr;
         gap: 10px;
@@ -746,16 +806,6 @@ body {
     
     .history-type {
         grid-column: 1 / -1;
-    }
-    
-    .btn, .btn-blue {
-        min-height: 50px;
-        font-size: 16px;
-    }
-    
-    .form-control, select, input {
-        min-height: 50px;
-        font-size: 16px;
     }
     
     .btn-blue {
@@ -770,22 +820,22 @@ body {
         z-index: 99;
     }
     
+    .time-selector {
+        flex-direction: column;
+    }
+    
+    .time-btn {
+        width: 100%;
+    }
+    
     .practice-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
     
-    .practice-time {
-        font-size: 16px;
-    }
-    
-    .practice-teams {
-        font-size: 18px;
-    }
-    
-    .practice-status {
-        align-self: flex-start;
+    .match-timer {
+        font-size: 20px;
     }
 }
 
@@ -802,236 +852,4 @@ body {
     .match-teams {
         font-size: 22px;
     }
-}
-/* БЛОК С ВРЕМЕНЕМ */
-.available-time {
-    margin-bottom: 25px;
-    padding: 15px;
-    background: #1a1a1a;
-    border-radius: 12px;
-    border-left: 3px solid #0066ff;
-}
-
-.time-selector {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-}
-
-.time-label {
-    font-size: 14px;
-    color: #888;
-    margin-right: 10px;
-}
-
-.time-btn {
-    background: #0a0a0a;
-    border: 1px solid #333;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    min-width: 80px;
-}
-
-.time-btn:hover {
-    border-color: #0066ff;
-    transform: scale(1.05);
-}
-
-.time-btn.selected {
-    background: #0066ff;
-    border-color: #0066ff;
-    color: white;
-}
-
-.no-time {
-    text-align: center;
-    padding: 20px;
-    color: #888;
-    font-size: 16px;
-    border: 1px dashed #333;
-    border-radius: 8px;
-}
-
-@media (max-width: 768px) {
-    .time-selector {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .time-btn {
-        width: 100%;
-    }
-}
-/* БЛОК С ВРЕМЕНЕМ */
-.available-time {
-    margin-bottom: 25px;
-    padding: 20px;
-    background: #1a1a1a;
-    border-radius: 12px;
-    border-left: 4px solid #0066ff;
-}
-
-.time-selector {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 15px;
-}
-
-.time-label {
-    font-size: 14px;
-    color: #888;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.time-btn {
-    background: #0a0a0a;
-    border: 2px solid #333;
-    color: #fff;
-    padding: 12px 25px;
-    border-radius: 10px;
-    font-size: 18px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
-    min-width: 100px;
-}
-
-.time-btn:hover {
-    border-color: #0066ff;
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(0,102,255,0.3);
-}
-
-.time-btn.selected {
-    background: #0066ff;
-    border-color: #0066ff;
-    color: white;
-    box-shadow: 0 5px 15px rgba(0,102,255,0.5);
-}
-
-.no-time {
-    text-align: center;
-    padding: 25px;
-    color: #888;
-    font-size: 18px;
-    font-weight: 500;
-    border: 2px dashed #333;
-    border-radius: 10px;
-    background: #0f0f0f;
-}
-
-@media (max-width: 768px) {
-    .time-selector {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .time-btn {
-        width: 100%;
-        padding: 15px;
-        font-size: 20px;
-    }
-    
-    .time-label {
-        text-align: center;
-        margin-bottom: 5px;
-    }
-    
-    .no-time {
-        font-size: 16px;
-        padding: 20px;
-    }
-}
-/* БЛОК ВРЕМЕНИ */
-.available-time {
-    margin-bottom: 25px;
-    padding: 20px;
-    background: #1a1a1a;
-    border-radius: 12px;
-    border-left: 4px solid #0066ff;
-}
-
-.time-selector {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 15px;
-}
-
-.time-label {
-    font-size: 14px;
-    color: #888;
-    font-weight: 500;
-    text-transform: uppercase;
-}
-
-.time-btn {
-    background: #0a0a0a;
-    border: 2px solid #333;
-    color: #fff;
-    padding: 12px 25px;
-    border-radius: 10px;
-    font-size: 18px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.2s;
-    min-width: 100px;
-}
-
-.time-btn:hover {
-    border-color: #0066ff;
-    transform: scale(1.05);
-}
-
-.time-btn.selected {
-    background: #0066ff;
-    border-color: #0066ff;
-    color: white;
-}
-
-.no-time {
-    text-align: center;
-    padding: 25px;
-    color: #888;
-    font-size: 18px;
-    border: 2px dashed #333;
-    border-radius: 10px;
-}
-
-@media (max-width: 768px) {
-    .time-selector {
-        flex-direction: column;
-    }
-    .time-btn {
-        width: 100%;
-    }
-}
-/* Для карт */
-.map-item input:checked {
-    accent-color: #0066ff;
-}
-
-.map-item {
-    user-select: none;
-}
-
-/* Для кнопок времени */
-.time-btn {
-    transition: all 0.2s;
-}
-
-.time-btn.selected {
-    background: #0066ff !important;
-    border-color: #0066ff !important;
-    color: white;
-    transform: scale(1.05);
 }
