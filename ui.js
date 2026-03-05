@@ -1,267 +1,340 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>JAVATEAM | Официальный сайт</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <!-- Мобильное меню -->
-    <div class="mobile-menu-toggle" id="mobileToggle">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
+// ==================== ДАННЫЕ ====================
+let times = [];
+let bookings = [];
+let history = [];
+let selectedTime = '';
+let timerInterval = null;
+
+// ==================== ЗАГРУЗКА ====================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[✅] Сайт загружен');
     
-    <div class="mobile-menu" id="mobileMenu">
-        <div class="mobile-menu-header">
-            <div class="mobile-logo">JAVATEAM</div>
-            <div class="mobile-close" id="mobileClose">✕</div>
-        </div>
-        <nav class="mobile-nav">
-            <a href="#home" class="mobile-nav-link">ГЛАВНАЯ</a>
-            <a href="#roster" class="mobile-nav-link">СОСТАВ</a>
-            <a href="#practices" class="mobile-nav-link">ПРАКИ</a>
-            <a href="#history" class="mobile-nav-link">ИСТОРИЯ</a>
-        </nav>
-        <div class="mobile-status">
-            <span>СТАТУС: <span class="online">ОНЛАЙН</span></span>
-        </div>
-    </div>
+    setupNavigation();
+    setupMobileMenu();
+    
+    // Первая загрузка
+    loadData();
+    
+    // Обновление КАЖДУЮ СЕКУНДУ
+    setInterval(loadData, 1000);
+    
+    // Кнопка отправки
+    const submitBtn = document.querySelector('.btn-blue');
+    if (submitBtn) {
+        submitBtn.onclick = function(e) {
+            e.preventDefault();
+            submitPractice();
+            return false;
+        };
+    }
+    
+    // Ограничение на карты (максимум 3)
+    document.querySelectorAll('.map-item input').forEach(cb => {
+        cb.addEventListener('change', function() {
+            let checked = document.querySelectorAll('.map-item input:checked').length;
+            if (checked > 3) {
+                this.checked = false;
+                alert('❌ Можно выбрать только 3 карты');
+            }
+        });
+    });
+});
 
-    <!-- Шапка -->
-    <header class="header">
-        <div class="container">
-            <div class="header-top">
-                <div class="logo">JAVATEAM</div>
-                <div class="status">СТАТУС: <span class="online">ОНЛАЙН</span></div>
-            </div>
+// ==================== ЗАГРУЗКА ДАННЫХ ====================
+function loadData() {
+    // Доступное время
+    fetch('http://localhost:8000/api/times')
+        .then(response => response.json())
+        .then(data => {
+            times = data;
+            renderTimes();
+        })
+        .catch(error => {
+            console.log('[❌] Ошибка загрузки времени:', error);
+        });
+    
+    // Забронированные праки
+    fetch('http://localhost:8000/api/bookings')
+        .then(response => response.json())
+        .then(data => {
+            bookings = data;
+            renderBookings();
+            updateMatchCenter();
+        })
+        .catch(error => {
+            console.log('[❌] Ошибка загрузки праков:', error);
+        });
+    
+    // История
+    fetch('http://localhost:8000/api/history')
+        .then(response => response.json())
+        .then(data => {
+            history = data;
+            renderHistory();
+        })
+        .catch(error => {
+            console.log('[❌] Ошибка загрузки истории:', error);
+        });
+}
+
+// ==================== ОТРИСОВКА ВРЕМЕНИ ====================
+function renderTimes() {
+    const block = document.getElementById('availableTimeBlock');
+    if (!block) return;
+    
+    // Свободное время (которое еще не забронировали)
+    const freeTimes = times.filter(t => !bookings.some(b => b.time === t));
+    
+    if (freeTimes.length === 0) {
+        block.innerHTML = '<div class="no-time">СЕГОДНЯ ПРАКОВ НЕТ</div>';
+        return;
+    }
+    
+    let html = '<div class="time-selector"><span class="time-label">ДОСТУПНОЕ ВРЕМЯ:</span>';
+    
+    freeTimes.forEach(t => {
+        html += `<button class="time-btn ${selectedTime === t ? 'selected' : ''}" 
+                       onclick="selectTime('${t}')">${t}</button>`;
+    });
+    
+    block.innerHTML = html + '</div>';
+}
+
+// ==================== ВЫБОР ВРЕМЕНИ ====================
+function selectTime(t) {
+    selectedTime = t;
+    
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        if (btn.textContent === t) {
+            btn.classList.add('selected');
+        } else {
+            btn.classList.remove('selected');
+        }
+    });
+    
+    alert(`✅ Выбрано время: ${t}`);
+}
+
+// ==================== ОТПРАВКА ЗАЯВКИ ====================
+function submitPractice() {
+    if (!selectedTime) {
+        alert('❌ Выберите время');
+        return;
+    }
+    
+    const team = document.getElementById('teamName').value;
+    const captain = document.getElementById('captainTag').value;
+    const captainId = document.getElementById('captainId').value;
+    const roster = document.getElementById('rosterPlayers').value;
+    
+    const maps = [];
+    document.querySelectorAll('.map-item input:checked').forEach(cb => {
+        maps.push(cb.value);
+    });
+    
+    if (!team) {
+        alert('❌ Введите название команды');
+        return;
+    }
+    
+    if (!captain || !captainId) {
+        alert('❌ Заполните контакты капитана');
+        return;
+    }
+    
+    if (maps.length === 0) {
+        alert('❌ Выберите хотя бы одну карту');
+        return;
+    }
+    
+    const data = {
+        time: selectedTime,
+        team: team,
+        captain: captain,
+        captainId: captainId,
+        maps: maps,
+        roster: roster
+    };
+    
+    console.log('[📤] Отправка:', data);
+    
+    fetch('http://localhost:8000/new_booking', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(() => {
+        alert('✅ Заявка отправлена!');
+        
+        // Очистка формы
+        document.getElementById('teamName').value = '';
+        document.getElementById('captainTag').value = '';
+        document.getElementById('captainId').value = '';
+        document.getElementById('rosterPlayers').value = '';
+        document.querySelectorAll('.map-item input:checked').forEach(cb => cb.checked = false);
+        
+        selectedTime = '';
+        
+        // Мгновенное обновление
+        loadData();
+    })
+    .catch(error => {
+        console.error('[❌] Ошибка:', error);
+        alert('❌ Ошибка отправки');
+    });
+}
+
+// ==================== ОТРИСОВКА ЗАБРОНИРОВАННЫХ ПРАКОВ ====================
+function renderBookings() {
+    const list = document.getElementById('practiceList');
+    if (!list) return;
+    
+    if (bookings.length === 0) {
+        list.innerHTML = '<div class="empty-state">Нет забронированных праков</div>';
+        return;
+    }
+    
+    list.innerHTML = bookings.map(b => `
+        <div class="practice-item confirmed">
+            <div class="practice-time">${b.time}</div>
+            <div class="practice-teams">JAVATEAM vs ${b.team}</div>
+            <div class="practice-status confirmed">ПОДТВЕРЖДЕН</div>
+        </div>
+    `).join('');
+}
+
+// ==================== ОТРИСОВКА ИСТОРИИ ====================
+function renderHistory() {
+    const list = document.getElementById('historyList');
+    if (!list) return;
+    
+    if (history.length === 0) {
+        list.innerHTML = '<div class="empty-state">История матчей пуста</div>';
+        return;
+    }
+    
+    list.innerHTML = history.map(h => `
+        <div class="history-item ${h.result}">
+            <span class="history-type">ПРАК</span>
+            <span class="history-opponent">VS ${h.opponent}</span>
+            <span class="history-score">${h.score}</span>
+            <span class="history-result">${h.result === 'win' ? 'ПОБЕДА' : 'ПОРАЖЕНИЕ'}</span>
+        </div>
+    `).join('');
+}
+
+// ==================== МАТЧ ЦЕНТР ====================
+function updateMatchCenter() {
+    const matchOpponent = document.getElementById('matchOpponent');
+    const matchTimer = document.getElementById('matchTimer');
+    const matchStatus = document.getElementById('matchStatus');
+    
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    
+    if (bookings.length === 0) {
+        matchOpponent.textContent = '—';
+        matchTimer.textContent = '';
+        matchStatus.textContent = 'НЕТ БЛИЖАЙШИХ МАТЧЕЙ';
+        return;
+    }
+    
+    const next = bookings[0];
+    matchOpponent.textContent = next.team;
+    matchStatus.textContent = 'БЛИЖАЙШИЙ МАТЧ';
+    
+    startTimer(next.time);
+}
+
+function startTimer(matchTime) {
+    const timerElement = document.getElementById('matchTimer');
+    if (!timerElement) return;
+    
+    const [hours, minutes] = matchTime.split(':').map(Number);
+    
+    function update() {
+        const now = new Date();
+        const matchDate = new Date();
+        matchDate.setHours(hours, minutes, 0, 0);
+        
+        if (now > matchDate) {
+            matchDate.setDate(matchDate.getDate() + 1);
+        }
+        
+        const diff = matchDate - now;
+        
+        if (diff <= 0) {
+            timerElement.textContent = 'МАТЧ ИДЕТ';
+            return;
+        }
+        
+        const h = Math.floor(diff / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        timerElement.textContent = h > 0 ? `ДО МАТЧА: ${h}ч ${m}м` : `ДО МАТЧА: ${m}м`;
+    }
+    
+    update();
+    timerInterval = setInterval(update, 60000);
+}
+
+// ==================== МОБИЛЬНОЕ МЕНЮ ====================
+function setupMobileMenu() {
+    const toggle = document.getElementById('mobileToggle');
+    const menu = document.getElementById('mobileMenu');
+    const close = document.getElementById('mobileClose');
+    const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+    
+    if (toggle) {
+        toggle.addEventListener('click', () => menu.classList.add('active'));
+    }
+    
+    if (close) {
+        close.addEventListener('click', () => menu.classList.remove('active'));
+    }
+    
+    mobileLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            mobileLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            menu.classList.remove('active');
             
-            <nav class="nav">
-                <a href="#home" class="nav-link active">ГЛАВНАЯ</a>
-                <a href="#roster" class="nav-link">СОСТАВ</a>
-                <a href="#practices" class="nav-link">ПРАКИ</a>
-                <a href="#history" class="nav-link">ИСТОРИЯ</a>
-            </nav>
-        </div>
-    </header>
+            const targetId = this.getAttribute('href');
+            if (targetId) {
+                document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+}
 
-    <!-- ГЛАВНАЯ -->
-    <section id="home" class="section">
-        <div class="container">
-            <div class="home-grid">
-                <div class="home-info fade-in">
-                    <h1 class="home-title">JAVATEAM</h1>
-                    <p class="home-desc">STANDOFF 2 • ПРОФЕССИОНАЛЬНАЯ КОМАНДА</p>
-                    <button class="btn pulse" onclick="scrollToSection('practices')">ПОДАТЬ ЗАЯВКУ</button>
-                </div>
-                
-                <!-- МАТЧ ЦЕНТР -->
-                <div class="match-center slide-in">
-                    <div class="match-header">
-                        <span>МАТЧ ЦЕНТР</span>
-                    </div>
-                    <div class="match-card" id="matchCenterCard">
-                        <div class="match-teams">
-                            <div class="team">JAVATEAM</div>
-                            <div class="vs">VS</div>
-                            <div class="team opponent" id="matchOpponent">—</div>
-                        </div>
-                        <div class="match-timer" id="matchTimer"></div>
-                        <div class="match-status" id="matchStatus">НЕТ БЛИЖАЙШИХ МАТЧЕЙ</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- СОСТАВ -->
-    <section id="roster" class="section">
-        <div class="container">
-            <h2 class="section-title">СОСТАВ КОМАНДЫ</h2>
+// ==================== НАВИГАЦИЯ ====================
+function setupNavigation() {
+    const links = document.querySelectorAll('.nav-link');
+    
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            links.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
             
-            <div class="roster-grid">
-                <!-- am5fost -->
-                <div class="player-card scale-in" style="animation-delay: 0.1s">
-                    <div class="player-name">am5fost</div>
-                    <div class="player-stats">
-                        <div class="player-stat">
-                            <span class="stat-label">K/D</span>
-                            <span class="stat-value">1.38</span>
-                        </div>
-                        <div class="player-stat">
-                            <span class="stat-label">ЧАСЫ</span>
-                            <span class="stat-value">1071</span>
-                        </div>
-                        <div class="player-stat">
-                            <span class="stat-label">ЗВАНИЕ</span>
-                            <span class="stat-value">LEGENDS</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- entry -->
-                <div class="player-card scale-in" style="animation-delay: 0.2s">
-                    <div class="player-name">entry</div>
-                    <div class="player-stats">
-                        <div class="player-stat">
-                            <span class="stat-label">K/D</span>
-                            <span class="stat-value">2.11</span>
-                        </div>
-                        <div class="player-stat">
-                            <span class="stat-label">ЧАСЫ</span>
-                            <span class="stat-value">236</span>
-                        </div>
-                        <div class="player-stat">
-                            <span class="stat-label">ЗВАНИЕ</span>
-                            <span class="stat-value">LEGENDS</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Huizy -->
-                <div class="player-card scale-in" style="animation-delay: 0.3s">
-                    <div class="player-name">Huizy</div>
-                    <div class="player-stats">
-                        <div class="player-stat">
-                            <span class="stat-label">K/D</span>
-                            <span class="stat-value">2.42</span>
-                        </div>
-                        <div class="player-stat">
-                            <span class="stat-label">ЧАСЫ</span>
-                            <span class="stat-value">774</span>
-                        </div>
-                        <div class="player-stat">
-                            <span class="stat-label">ЗВАНИЕ</span>
-                            <span class="stat-value">LEGENDS</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Bloodaim -->
-                <div class="player-card scale-in" style="animation-delay: 0.4s">
-                    <div class="player-name">Bloodaim</div>
-                    <div class="player-stats">
-                        <div class="player-stat">
-                            <span class="stat-label">K/D</span>
-                            <span class="stat-value">3.54</span>
-                        </div>
-                        <div class="player-stat">
-                            <span class="stat-label">ЧАСЫ</span>
-                            <span class="stat-value">421</span>
-                        </div>
-                        <div class="player-stat">
-                            <span class="stat-label">ЗВАНИЕ</span>
-                            <span class="stat-value">LEGENDS</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- blast -->
-                <div class="player-card scale-in" style="animation-delay: 0.5s">
-                    <div class="player-name">blast</div>
-                    <div class="player-stats">
-                        <div class="player-stat">
-                            <span class="stat-label">K/D</span>
-                            <span class="stat-value">1.60</span>
-                        </div>
-                        <div class="player-stat">
-                            <span class="stat-label">ЧАСЫ</span>
-                            <span class="stat-value">564</span>
-                        </div>
-                        <div class="player-stat">
-                            <span class="stat-label">ЗВАНИЕ</span>
-                            <span class="stat-value">LEGENDS</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+            const targetId = this.getAttribute('href');
+            if (targetId) {
+                document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+}
 
-    <!-- ПРАКИ -->
-    <section id="practices" class="section">
-        <div class="container">
-            <h2 class="section-title">ЗАПИСЬ НА ПРАК</h2>
-            
-            <div class="practices-grid">
-                <!-- Форма -->
-                <div class="practice-form slide-up">
-                    <h3 class="form-title">НОВАЯ ЗАЯВКА</h3>
-                    
-                    <!-- БЛОК С ДОСТУПНЫМ ВРЕМЕНЕМ -->
-                    <div class="available-time" id="availableTimeBlock">
-                        <div class="no-time">ЗАГРУЗКА...</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>НАЗВАНИЕ КОМАНДЫ</label>
-                        <input type="text" id="teamName" class="form-control" placeholder="AIRX TEAM" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>КАПИТАН (TELEGRAM)</label>
-                        <input type="text" id="captainTag" class="form-control" placeholder="@username" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>ID КАПИТАНА</label>
-                        <input type="text" id="captainId" class="form-control" placeholder="12345678" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>ВЫБЕРИТЕ КАРТЫ (максимум 3)</label>
-                        <div class="maps-grid">
-                            <label class="map-item"><input type="checkbox" value="Sandstone"> Sandstone</label>
-                            <label class="map-item"><input type="checkbox" value="Rust"> Rust</label>
-                            <label class="map-item"><input type="checkbox" value="Dune"> Dune</label>
-                            <label class="map-item"><input type="checkbox" value="Province"> Province</label>
-                            <label class="map-item"><input type="checkbox" value="Breeze"> Breeze</label>
-                            <label class="map-item"><input type="checkbox" value="Zone 9"> Zone 9</label>
-                            <label class="map-item"><input type="checkbox" value="Hanami"> Hanami</label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>СОСТАВ (5 игроков через запятую)</label>
-                        <input type="text" id="rosterPlayers" class="form-control" placeholder="nick1, nick2, nick3, nick4, nick5">
-                    </div>
-                    
-                    <button class="btn btn-blue btn-block" onclick="submitPractice()">ОТПРАВИТЬ ЗАЯВКУ</button>
-                </div>
-                
-                <!-- Забронированные праки -->
-                <div class="active-practices slide-up" style="animation-delay: 0.2s">
-                    <h3 class="form-title">ЗАБРОНИРОВАННЫЕ ПРАКИ</h3>
-                    <div id="practiceList" class="practice-list">
-                        <div class="empty-state">Загрузка...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+function scrollToSection(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
 
-    <!-- ИСТОРИЯ МАТЧЕЙ -->
-    <section id="history" class="section">
-        <div class="container">
-            <h2 class="section-title">ИСТОРИЯ МАТЧЕЙ</h2>
-            <div id="historyList" class="history-list">
-                <div class="empty-state">Загрузка...</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Футер -->
-    <footer class="footer">
-        <div class="container">
-            <p>© 2026 JAVATEAM</p>
-            <div class="footer-social">
-                <a href="https://t.me/JavaTeamOffical" target="_blank" class="tg-link">TELEGRAM</a>
-            </div>
-        </div>
-    </footer>
-
-    <script src="ui.js"></script>
-</body>
-</html>
+// ==================== ГЛОБАЛЬНЫЕ ФУНКЦИИ ====================
+window.scrollToSection = scrollToSection;
+window.selectTime = selectTime;
