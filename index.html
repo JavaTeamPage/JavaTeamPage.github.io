@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>JAVATEAM | Официальный сайт</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Прелоадер -->
+    <div class="preloader">
+        <div class="preloader-content">
+            <div class="preloader-logo">JAVATEAM</div>
+            <div class="preloader-progress">
+                <div class="preloader-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Мобильное меню -->
+    <div class="menu-overlay"></div>
+    <div class="menu-toggle" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-header">
+            <div class="mobile-logo">JAVATEAM</div>
+            <div class="mobile-close" id="mobileClose">✕</div>
+        </div>
+        <div class="mobile-nav-links">
+            <a href="#home" class="mobile-link">Главная</a>
+            <a href="#roster" class="mobile-link">Состав</a>
+            <a href="#practices" class="mobile-link">Праки</a>
+            <a href="#history" class="mobile-link">История</a>
+        </div>
+        <div class="mobile-nav-footer">
+            <span class="status-dot"></span>
+            ONLINE
+        </div>
+    </nav>
+
+    <!-- Шапка -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo" data-text="JAVATEAM">JAVATEAM</div>
+                <nav class="desktop-nav">
+                    <a href="#home" class="nav-link">Главная</a>
+                    <a href="#roster" class="nav-link">Состав</a>
+                    <a href="#practices" class="nav-link">Праки</a>
+                    <a href="#history" class="nav-link">История</a>
+                </nav>
+                <div class="header-status">
+                    <span class="status-dot"></span>
+                    ONLINE
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ГЛАВНАЯ -->
+    <section id="home" class="section hero">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <span class="hero-badge">STANDOFF 2</span>
+                    <h1 class="hero-title">JAVATEAM</h1>
+                    <p class="hero-subtitle">Профессиональная команда с хорошими игроками!</p>
+                    <button class="hero-btn btn-shine btn-ripple" onclick="scrollToSection('practices')">
+                        Подать заявку
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Матч центр -->
+                <div class="match-card card-shine card-float">
+                    <div class="match-header">
+                        <span>МАТЧ ЦЕНТР</span>
+                        <span class="match-badge">LIVE</span>
+                    </div>
+                    <div class="match-content">
+                        <div class="match-teams">
+                            <span class="team">JAVATEAM</span>
+                            <span class="vs">VS</span>
+                            <span class="team" id="matchOpponent">—</span>
+                        </div>
+                        <div class="match-timer" id="matchTimer"></div>
+                        <div class="match-status" id="matchStatus">Нет ближайших матчей</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- СОСТАВ -->
+    <section id="roster" class="section">
+        <div class="container">
+            <h2 class="section-title">Состав команды</h2>
+            
+            <div class="roster-grid">
+                <!-- am5fost (телефон) -->
+                <div class="player-card" data-player="am5fost">
+                    <div class="player-device device-phone">📱</div>
+                    <div class="player-avatar">
+                        <img src="image/am5fost.jpg" alt="am5fost" onerror="this.src='https://via.placeholder.com/150/7b68ee/ffffff?text=am5fost'">
+                    </div>
+                    <div class="player-info">
+                        <h3 class="player-name">am5fost</h3>
+                        <div class="player-stats">
+                            <div class="stat">
+                                <span class="stat-label">K/D</span>
+                                <span class="stat-value">1.38</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Часы</span>
+                                <span class="stat-value">1071</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Звание</span>
+                                <span class="stat-value">LEGENDS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- entry (телефон) -->
+                <div class="player-card" data-player="entry">
+                    <div class="player-device device-phone">📱</div>
+                    <div class="player-avatar">
+                        <img src="image/entry.jpg" alt="entry" onerror="this.src='https://via.placeholder.com/150/7b68ee/ffffff?text=entry'">
+                    </div>
+                    <div class="player-info">
+                        <h3 class="player-name">entry</h3>
+                        <div class="player-stats">
+                            <div class="stat">
+                                <span class="stat-label">K/D</span>
+                                <span class="stat-value">2.11</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Часы</span>
+                                <span class="stat-value">236</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Звание</span>
+                                <span class="stat-value">LEGENDS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Huizy (телефон) -->
+                <div class="player-card" data-player="Huizy">
+                    <div class="player-device device-phone">📱</div>
+                    <div class="player-avatar">
+                        <img src="image/Huizy.jpg" alt="Huizy" onerror="this.src='https://via.placeholder.com/150/7b68ee/ffffff?text=Huizy'">
+                    </div>
+                    <div class="player-info">
+                        <h3 class="player-name">Huizy</h3>
+                        <div class="player-stats">
+                            <div class="stat">
+                                <span class="stat-label">K/D</span>
+                                <span class="stat-value">2.42</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Часы</span>
+                                <span class="stat-value">774</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Звание</span>
+                                <span class="stat-value">LEGENDS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bloodaim (телефон) -->
+                <div class="player-card" data-player="Bloodaim">
+                    <div class="player-device device-phone">📱</div>
+                    <div class="player-avatar">
+                        <img src="image/Bloodaim.jpg" alt="Bloodaim" onerror="this.src='https://via.placeholder.com/150/7b68ee/ffffff?text=Bloodaim'">
+                    </div>
+                    <div class="player-info">
+                        <h3 class="player-name">Bloodaim</h3>
+                        <div class="player-stats">
+                            <div class="stat">
+                                <span class="stat-label">K/D</span>
+                                <span class="stat-value">3.54</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Часы</span>
+                                <span class="stat-value">421</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Звание</span>
+                                <span class="stat-value">LEGENDS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- blast (телефон) -->
+                <div class="player-card" data-player="blast">
+                    <div class="player-device device-phone">📱</div>
+                    <div class="player-avatar">
+                        <img src="image/blast.jpg" alt="blast" onerror="this.src='https://via.placeholder.com/150/7b68ee/ffffff?text=blast'">
+                    </div>
+                    <div class="player-info">
+                        <h3 class="player-name">blast</h3>
+                        <div class="player-stats">
+                            <div class="stat">
+                                <span class="stat-label">K/D</span>
+                                <span class="stat-value">1.60</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Часы</span>
+                                <span class="stat-value">564</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Звание</span>
+                                <span class="stat-value">LEGENDS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title reserve-title">Резерв</h2>
+            
+            <div class="roster-grid">
+                <!-- Eclipse (телефон/ПК) -->
+                <div class="player-card reserve" data-player="Eclipse">
+                    <div class="player-device device-both">📱💻</div>
+                    <div class="player-avatar">
+                        <img src="image/Eclipse.jpg" alt="Eclipse" onerror="this.src='https://via.placeholder.com/150/9e98b3/ffffff?text=Eclipse'">
+                    </div>
+                    <div class="player-info">
+                        <h3 class="player-name">Eclipse</h3>
+                        <div class="player-stats">
+                            <div class="stat">
+                                <span class="stat-label">K/D</span>
+                                <span class="stat-value">1.87</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Часы</span>
+                                <span class="stat-value">636</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Звание</span>
+                                <span class="stat-value">LEGENDS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dxsy (ПК) -->
+                <div class="player-card reserve" data-player="Dxsy">
+                    <div class="player-device device-pc">💻</div>
+                    <div class="player-avatar">
+                        <img src="image/Dxsy.jpg" alt="Dxsy" onerror="this.src='https://via.placeholder.com/150/9e98b3/ffffff?text=Dxsy'">
+                    </div>
+                    <div class="player-info">
+                        <h3 class="player-name">Dxsy</h3>
+                        <div class="player-stats">
+                            <div class="stat">
+                                <span class="stat-label">K/D</span>
+                                <span class="stat-value">2.36</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Часы</span>
+                                <span class="stat-value">1007</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Звание</span>
+                                <span class="stat-value">LEGENDS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ПРАКИ -->
+    <section id="practices" class="section">
+        <div class="container">
+            <h2 class="section-title">Запись на прак</h2>
+            
+            <div class="practices-container">
+                <!-- Форма -->
+                <div class="form-card slide-up">
+                    <h3 class="form-title">Новая заявка</h3>
+                    
+                    <div class="time-section">
+                        <div class="time-label">Доступное время</div>
+                        <div class="time-grid" id="availableTimeBlock">
+                            <div class="loading">Загрузка...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Команда</label>
+                        <input type="text" id="teamName" placeholder="AIRX TEAM" class="form-input">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Капитан (TG)</label>
+                            <input type="text" id="captainTag" placeholder="@username" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>ID капитана</label>
+                            <input type="text" id="captainId" placeholder="12345678" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Карты (макс. 3)</label>
+                        <div class="maps-grid">
+                            <label class="map-item">
+                                <input type="checkbox" value="Sandstone">
+                                <span>Sandstone</span>
+                            </label>
+                            <label class="map-item">
+                                <input type="checkbox" value="Rust">
+                                <span>Rust</span>
+                            </label>
+                            <label class="map-item">
+                                <input type="checkbox" value="Dune">
+                                <span>Dune</span>
+                            </label>
+                            <label class="map-item">
+                                <input type="checkbox" value="Province">
+                                <span>Province</span>
+                            </label>
+                            <label class="map-item">
+                                <input type="checkbox" value="Breeze">
+                                <span>Breeze</span>
+                            </label>
+                            <label class="map-item">
+                                <input type="checkbox" value="Zone 9">
+                                <span>Zone 9</span>
+                            </label>
+                            <label class="map-item">
+                                <input type="checkbox" value="Hanami">
+                                <span>Hanami</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Состав (5 игроков через запятую)</label>
+                        <input type="text" id="rosterPlayers" placeholder="nick1, nick2, nick3, nick4, nick5" class="form-input">
+                    </div>
+                    
+                    <button class="submit-btn btn-shine btn-ripple" onclick="submitPractice()">Отправить заявку</button>
+                </div>
+                
+                <!-- Забронированные -->
+                <div class="bookings-card slide-up delay-2">
+                    <h3 class="form-title">Забронированные праки</h3>
+                    <div class="bookings-list" id="practiceList">
+                        <div class="empty-state">Нет забронированных праков</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ИСТОРИЯ -->
+    <section id="history" class="section">
+        <div class="container">
+            <h2 class="section-title">История матчей</h2>
+            <div class="history-list" id="historyList">
+                <div class="empty-state">История пуста</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ФУТЕР -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">JAVATEAM</div>
+                <a href="https://t.me/JavaTeamOffical" target="_blank" class="social-link btn-shine">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Telegram
+                </a>
+                <div class="footer-copyright">© 2026 JAVATEAM</div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="ui.js"></script>
+</body>
+</html>
