@@ -1,7 +1,6 @@
-// ===== ГЛОБАЛЬНЫЕ ДАННЫЕ (ПУСТЫЕ) =====
-let availableTimes = []; // Только то, что добавит админ
-let bookings = [];       // Только подтвержденные праки
-let historyMatches = []; // Только сыгранные праки
+// ===== ГЛОБАЛЬНЫЕ ДАННЫЕ =====
+let availableTimes = [];
+let bookings = [];
 let selectedTime = '';
 
 // ===== ЗАГРУЗКА =====
@@ -16,8 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initBurgerMenu();
     initNavigation();
     initMapLimits();
-    loadFromStorage();
-    renderAll();
+    loadData();
+    
+    // Запускаем обновление каждые 2 секунды
+    setInterval(loadData, 2000);
     
     // Кнопка отправки
     const submitBtn = document.querySelector('.submit-btn');
@@ -28,6 +29,149 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ===== ЗАГРУЗКА ДАННЫХ ИЗ STORAGE =====
+function loadData() {
+    // Загружаем доступное время
+    const times = JSON.parse(localStorage.getItem('javateam_times') || '[]');
+    availableTimes = times.map(t => ({ time: t, available: true }));
+    
+    // Загружаем подтвержденные праки
+    bookings = JSON.parse(localStorage.getItem('javateam_bookings') || '[]');
+    
+    renderTimes();
+    renderBookings();
+}
+
+// ===== ОТРИСОВКА ВРЕМЕНИ =====
+function renderTimes() {
+    const block = document.getElementById('availableTimeBlock');
+    if (!block) return;
+    
+    // Время которое еще не забронировали
+    const bookedTimes = bookings.map(b => b.time);
+    const freeTimes = availableTimes.filter(t => !bookedTimes.includes(t.time));
+    
+    if (freeTimes.length === 0) {
+        block.innerHTML = '<div class="no-time">СЕГОДНЯ ПРАКОВ НЕТ</div>';
+        return;
+    }
+    
+    let html = '<div class="time-slots">';
+    freeTimes.forEach(t => {
+        html += `<button class="time-slot ${selectedTime === t.time ? 'selected' : ''}" 
+                       onclick="window.selectTime('${t.time}')">${t.time}</button>`;
+    });
+    html += '</div>';
+    
+    block.innerHTML = html;
+}
+
+// ===== ВЫБОР ВРЕМЕНИ =====
+window.selectTime = function(time) {
+    selectedTime = time;
+    renderTimes();
+};
+
+// ===== ОТРИСОВКА ПОДТВЕРЖДЕННЫХ ПРАКОВ =====
+function renderBookings() {
+    const list = document.getElementById('confirmedList');
+    if (!list) return;
+    
+    if (bookings.length === 0) {
+        list.innerHTML = '<div class="empty-state">Нет подтвержденных праков</div>';
+        return;
+    }
+    
+    list.innerHTML = bookings.map(b => `
+        <div class="confirmed-item">
+            <span class="confirmed-time">${b.time}</span>
+            <span class="confirmed-teams">JAVATEAM vs ${b.team}</span>
+            <span class="confirmed-status">ПОДТВЕРЖДЁН</span>
+        </div>
+    `).join('');
+}
+
+// ===== КАРТЫ (МАКС 3) =====
+function initMapLimits() {
+    const mapItems = document.querySelectorAll('.map-item');
+    let selectedMaps = [];
+    
+    mapItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const mapName = this.dataset.map;
+            
+            if (this.classList.contains('selected')) {
+                this.classList.remove('selected');
+                selectedMaps = selectedMaps.filter(m => m !== mapName);
+            } else {
+                if (selectedMaps.length >= 3) {
+                    alert('❌ Можно выбрать не более 3 карт');
+                    return;
+                }
+                this.classList.add('selected');
+                selectedMaps.push(mapName);
+            }
+        });
+    });
+}
+
+// ===== ОТПРАВКА ЗАЯВКИ =====
+window.submitPractice = function() {
+    if (!selectedTime) {
+        alert('❌ Выберите время');
+        return;
+    }
+    
+    const team = document.getElementById('teamName').value.trim();
+    const captain = document.getElementById('captainNick').value.trim();
+    const captainId = document.getElementById('captainId').value.trim();
+    const tg = document.getElementById('captainTag').value.trim();
+    const roster = document.getElementById('roster').value.trim();
+    
+    const selectedMaps = [];
+    document.querySelectorAll('.map-item.selected').forEach(item => {
+        selectedMaps.push(item.dataset.map);
+    });
+    
+    if (!team || !captain || !captainId || !tg || !roster) {
+        alert('❌ Заполните все поля');
+        return;
+    }
+    
+    if (selectedMaps.length === 0) {
+        alert('❌ Выберите карты');
+        return;
+    }
+    
+    // Создаем заявку
+    const newBooking = {
+        time: selectedTime,
+        team: team,
+        captain: captain,
+        captainId: captainId,
+        tg: tg,
+        maps: selectedMaps.join(', '),
+        roster: roster
+    };
+    
+    // Сохраняем в pending
+    const pending = JSON.parse(localStorage.getItem('javateam_pending') || '[]');
+    pending.push(newBooking);
+    localStorage.setItem('javateam_pending', JSON.stringify(pending));
+    
+    alert('✅ Заявка отправлена! Ожидайте подтверждения администратора.');
+    
+    // Очистка формы
+    document.getElementById('teamName').value = '';
+    document.getElementById('captainNick').value = '';
+    document.getElementById('captainId').value = '';
+    document.getElementById('captainTag').value = '';
+    document.getElementById('roster').value = '';
+    document.querySelectorAll('.map-item').forEach(item => item.classList.remove('selected'));
+    selectedTime = '';
+    renderTimes();
+};
 
 // ===== БУРГЕР-МЕНЮ =====
 function initBurgerMenu() {
@@ -91,183 +235,6 @@ function initNavigation() {
     });
 }
 
-// ===== ЗАГРУЗКА ИЗ STORAGE =====
-function loadFromStorage() {
-    const savedTimes = localStorage.getItem('javateam_times');
-    const savedBookings = localStorage.getItem('javateam_bookings');
-    const savedHistory = localStorage.getItem('javateam_history');
-    
-    if (savedTimes) availableTimes = JSON.parse(savedTimes);
-    else availableTimes = []; // Пустой массив по умолчанию
-    
-    if (savedBookings) bookings = JSON.parse(savedBookings);
-    else bookings = []; // Пустой массив по умолчанию
-    
-    if (savedHistory) historyMatches = JSON.parse(savedHistory);
-    else historyMatches = []; // Пустой массив по умолчанию
-}
-
-// ===== СОХРАНЕНИЕ В STORAGE =====
-function saveToStorage() {
-    localStorage.setItem('javateam_times', JSON.stringify(availableTimes));
-    localStorage.setItem('javateam_bookings', JSON.stringify(bookings));
-    localStorage.setItem('javateam_history', JSON.stringify(historyMatches));
-}
-
-// ===== ОТРИСОВКА ВСЕГО =====
-function renderAll() {
-    renderTimes();
-    renderBookings();
-    renderHistory();
-}
-
-// ===== ВРЕМЯ =====
-function renderTimes() {
-    const block = document.getElementById('availableTimeBlock');
-    if (!block) return;
-    
-    // Время которое еще не забронировали
-    const freeTimes = availableTimes.filter(t => t.available && !bookings.some(b => b.time === t.time));
-    
-    if (freeTimes.length === 0) {
-        block.innerHTML = '<div class="no-time">СЕГОДНЯ ПРАКОВ НЕТ</div>';
-        return;
-    }
-    
-    let html = '';
-    freeTimes.forEach(t => {
-        html += `<button class="time-slot ${selectedTime === t.time ? 'selected' : ''}" 
-                       onclick="window.selectTime('${t.time}')">${t.time}</button>`;
-    });
-    
-    block.innerHTML = html;
-}
-
-window.selectTime = function(time) {
-    selectedTime = time;
-    renderTimes();
-};
-
-// ===== КАРТЫ (МАКС 3) =====
-function initMapLimits() {
-    const mapItems = document.querySelectorAll('.map-item');
-    let selectedMaps = [];
-    
-    mapItems.forEach(item => {
-        item.addEventListener('click', function() {
-            const mapName = this.dataset.map;
-            
-            if (this.classList.contains('selected')) {
-                this.classList.remove('selected');
-                selectedMaps = selectedMaps.filter(m => m !== mapName);
-            } else {
-                if (selectedMaps.length >= 3) {
-                    alert('❌ Можно выбрать не более 3 карт');
-                    return;
-                }
-                this.classList.add('selected');
-                selectedMaps.push(mapName);
-            }
-        });
-    });
-}
-
-// ===== ОТПРАВКА ЗАЯВКИ =====
-window.submitPractice = function() {
-    if (!selectedTime) {
-        alert('❌ Выберите время');
-        return;
-    }
-    
-    const team = document.getElementById('teamName').value.trim();
-    const captain = document.getElementById('captainNick').value.trim();
-    const captainId = document.getElementById('captainId').value.trim();
-    const tg = document.getElementById('captainTag').value.trim();
-    const roster = document.getElementById('roster').value.trim();
-    
-    const selectedMaps = [];
-    document.querySelectorAll('.map-item.selected').forEach(item => {
-        selectedMaps.push(item.dataset.map);
-    });
-    
-    if (!team || !captain || !captainId || !tg || !roster) {
-        alert('❌ Заполните все поля');
-        return;
-    }
-    
-    if (selectedMaps.length === 0) {
-        alert('❌ Выберите карты');
-        return;
-    }
-    
-    // Создаем заявку
-    const newBooking = {
-        time: selectedTime,
-        team: team,
-        captain: captain,
-        captainId: captainId,
-        tg: tg,
-        maps: selectedMaps.join(', '),
-        roster: roster,
-        status: 'pending'
-    };
-    
-    // Сохраняем в localStorage
-    const pendingBookings = JSON.parse(localStorage.getItem('javateam_pending') || '[]');
-    pendingBookings.push(newBooking);
-    localStorage.setItem('javateam_pending', JSON.stringify(pendingBookings));
-    
-    alert('✅ Заявка отправлена! Ожидайте подтверждения администратора.');
-    
-    // Очистка формы
-    document.getElementById('teamName').value = '';
-    document.getElementById('captainNick').value = '';
-    document.getElementById('captainId').value = '';
-    document.getElementById('captainTag').value = '';
-    document.getElementById('roster').value = '';
-    document.querySelectorAll('.map-item').forEach(item => item.classList.remove('selected'));
-    selectedTime = '';
-    renderTimes();
-};
-
-// ===== ЗАБРОНИРОВАННЫЕ ПРАКИ =====
-function renderBookings() {
-    const list = document.getElementById('confirmedList');
-    if (!list) return;
-    
-    if (bookings.length === 0) {
-        list.innerHTML = '<div class="empty-state">Нет подтвержденных праков</div>';
-        return;
-    }
-    
-    list.innerHTML = bookings.map(b => `
-        <div class="confirmed-item">
-            <span class="confirmed-time">${b.time}</span>
-            <span class="confirmed-teams">JAVATEAM vs ${b.team}</span>
-            <span class="confirmed-status">ПОДТВЕРЖДЁН</span>
-        </div>
-    `).join('');
-}
-
-// ===== ИСТОРИЯ =====
-function renderHistory() {
-    const list = document.getElementById('historyList');
-    if (!list) return;
-    
-    if (historyMatches.length === 0) {
-        list.innerHTML = '<div class="empty-state">Нет сыгранных праков</div>';
-        return;
-    }
-    
-    list.innerHTML = historyMatches.map(m => `
-        <div class="history-row ${m.result}">
-            <span class="history-opponent">VS ${m.opponent}</span>
-            <span class="history-score">${m.score}</span>
-            <span class="history-result">${m.result === 'win' ? 'ПОБЕДА' : 'ПОРАЖЕНИЕ'}</span>
-        </div>
-    `).join('');
-}
-
 // ===== ДАННЫЕ СОСТАВА =====
 const rosterData = [
     { nick: 'Eclipse', id: '159742523', kd: '1.87', pracs: '12', hours: '645', kpr: '0.85' },
@@ -315,7 +282,7 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, { threshold: 0.1 });
 
-document.querySelectorAll('.player-card, .practice-card, .confirmed-card, .about-card, .history-row').forEach(el => {
+document.querySelectorAll('.player-card, .practice-card, .confirmed-card, .about-card').forEach(el => {
     el.style.opacity = '0';
     el.style.transform = 'translateY(30px) scale(0.95)';
     el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
