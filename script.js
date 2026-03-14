@@ -1,10 +1,12 @@
 // ============================================
-//      JAVATEAM - СКРИПТ САЙТА
+//      JAVATEAM - СКРИПТ САЙТА v2.0
+//      ИСПРАВЛЕННАЯ ВЕРСИЯ
 // ============================================
 
 // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
 let selectedTime = '';
 let selectedMaps = [];
+let isMenuOpen = false;
 
 // ===== ПРЕЛОАДЕР =====
 (function() {
@@ -41,6 +43,7 @@ let selectedMaps = [];
         overlay.classList.add('active');
         toggle.classList.add('active');
         document.body.classList.add('menu-open');
+        isMenuOpen = true;
     });
     
     const closeMenu = () => {
@@ -48,10 +51,15 @@ let selectedMaps = [];
         overlay.classList.remove('active');
         toggle.classList.remove('active');
         document.body.classList.remove('menu-open');
+        isMenuOpen = false;
     };
     
     if (close) close.addEventListener('click', closeMenu);
     overlay.addEventListener('click', closeMenu);
+    
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768 && isMenuOpen) closeMenu();
+    });
 })();
 
 // ===== НАВИГАЦИЯ =====
@@ -62,7 +70,7 @@ let selectedMaps = [];
     
     window.addEventListener('scroll', () => {
         const scrollY = window.scrollY;
-        header?.classList.toggle('scrolled', scrollY > 50);
+        if (header) header.classList.toggle('scrolled', scrollY > 50);
         
         let current = '';
         sections.forEach(section => {
@@ -75,9 +83,8 @@ let selectedMaps = [];
         
         links.forEach(link => {
             link.classList.remove('active');
-            if (link.getAttribute('href') === `#${current}`) {
-                link.classList.add('active');
-            }
+            const href = link.getAttribute('href');
+            if (href === `#${current}`) link.classList.add('active');
         });
     });
     
@@ -94,12 +101,23 @@ let selectedMaps = [];
 
 // ===== ЗАГРУЗКА ДАННЫХ =====
 function loadData() {
-    if (!window.JAVATEAM_DB) return;
+    if (!window.JAVATEAM_DB) {
+        console.error('JAVATEAM_DB не найден!');
+        return;
+    }
     
-    renderTimes(JAVATEAM_DB.getAvailableTimes());
-    renderBookings(JAVATEAM_DB.getBookings());
-    renderHistory(JAVATEAM_DB.getHistory());
-    renderRoster();
+    try {
+        // ИСПРАВЛЕНО: getConfirmed() вместо getBookings()
+        const times = JAVATEAM_DB.getAvailableTimes?.() || [];
+        const confirmed = JAVATEAM_DB.getConfirmed?.() || [];
+        const history = JAVATEAM_DB.getHistory?.() || [];
+        
+        renderTimes(times);
+        renderConfirmed(confirmed);
+        renderHistory(history);
+    } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+    }
 }
 
 // ===== ВРЕМЯ =====
@@ -107,19 +125,19 @@ function renderTimes(times) {
     const block = document.getElementById('availableTimeBlock');
     if (!block) return;
     
-    if (!times?.length) {
+    if (!times || times.length === 0) {
         block.innerHTML = '<div class="empty-state">Нет доступного времени</div>';
         return;
     }
     
     block.innerHTML = times.map(time => 
-        `<button class="time-slot ${selectedTime === time ? 'selected' : ''}" onclick="selectTime('${time}')">${time}</button>`
+        `<button class="time-slot ${selectedTime === time ? 'selected' : ''}" onclick="window.selectTime('${time}')">${time}</button>`
     ).join('');
 }
 
 window.selectTime = function(time) {
     selectedTime = time;
-    renderTimes(JAVATEAM_DB?.getAvailableTimes());
+    renderTimes(JAVATEAM_DB?.getAvailableTimes() || []);
 };
 
 // ===== КАРТЫ =====
@@ -168,6 +186,8 @@ window.submitPractice = function() {
     const players = roster.split(',').map(p => p.trim()).filter(p => p);
     if (players.length < 5) return alert('❌ Укажите 5 игроков');
     
+    if (!window.JAVATEAM_DB) return alert('❌ База данных не загружена');
+    
     const result = JAVATEAM_DB.addPending({
         time: selectedTime,
         team: team.toUpperCase(),
@@ -177,7 +197,7 @@ window.submitPractice = function() {
     });
     
     if (result.success) {
-        alert('✅ Заявка отправлена!');
+        alert('✅ Заявка отправлена! Ожидайте подтверждения.');
         document.getElementById('teamName').value = '';
         document.getElementById('captainNick').value = '';
         document.getElementById('captainId').value = '';
@@ -189,19 +209,21 @@ window.submitPractice = function() {
         if (counter) counter.textContent = '0 / 3';
         loadData();
     } else {
-        alert('❌ ' + (result.error || 'Ошибка'));
+        alert('❌ ' + (result.error || 'Ошибка отправки'));
     }
 };
 
-// ===== ОТРИСОВКА =====
-function renderBookings(bookings) {
+// ===== ПОДТВЕРЖДЕННЫЕ ПРАКИ =====
+function renderConfirmed(confirmed) {
     const list = document.getElementById('confirmedList');
     if (!list) return;
-    if (!bookings?.length) {
+    
+    if (!confirmed || confirmed.length === 0) {
         list.innerHTML = '<div class="empty-state">Нет подтвержденных праков</div>';
         return;
     }
-    list.innerHTML = bookings.map(b => `
+    
+    list.innerHTML = confirmed.map(b => `
         <div class="confirmed-item">
             <span class="confirmed-time">${b.time}</span>
             <span class="confirmed-teams">JAVATEAM vs ${b.team}</span>
@@ -210,13 +232,16 @@ function renderBookings(bookings) {
     `).join('');
 }
 
+// ===== ИСТОРИЯ =====
 function renderHistory(history) {
     const list = document.getElementById('historyList');
     if (!list) return;
-    if (!history?.length) {
+    
+    if (!history || history.length === 0) {
         list.innerHTML = '<div class="empty-state">Нет сыгранных праков</div>';
         return;
     }
+    
     list.innerHTML = history.map(h => `
         <div class="history-row ${h.result}">
             <span class="history-opponent">VS ${h.opponent}</span>
@@ -226,40 +251,44 @@ function renderHistory(history) {
     `).join('');
 }
 
+// ===== СОСТАВ =====
 function renderRoster() {
     if (!window.JAVATEAM_DB) return;
     
-    const main = document.getElementById('mainRoster');
-    const reserve = document.getElementById('reserveRoster');
+    const mainContainer = document.getElementById('mainRoster');
+    const reserveContainer = document.getElementById('reserveRoster');
     
-    if (main) {
-        main.innerHTML = JAVATEAM_DB.getMainRoster().map(p => `
+    const mainRoster = JAVATEAM_DB.getMainRoster?.() || [];
+    const reserveRoster = JAVATEAM_DB.getReserveRoster?.() || [];
+    
+    if (mainContainer) {
+        mainContainer.innerHTML = mainRoster.map(p => `
             <div class="player-card">
                 <div class="player-nick">${p.nick}</div>
-                <div class="player-id">ID: ${p.uid}</div>
+                <div class="player-id">ID: ${p.id}</div>
                 <div class="player-stats">
-                    <div class="player-stat"><span class="stat-label">K/D</span><span class="stat-value">${p.kd}</span></div>
-                    <div class="player-stat"><span class="stat-label">ПРАКИ</span><span class="stat-value">${p.pracs}</span></div>
-                    <div class="player-stat"><span class="stat-label">ЧАСЫ</span><span class="stat-value">${p.hours}</span></div>
-                    <div class="player-stat"><span class="stat-label">РАНГ</span><span class="stat-value">${p.rank}</span></div>
+                    <div class="player-stat"><span class="stat-label">K/D</span><span class="stat-value">${p.stats?.kd || '0'}</span></div>
+                    <div class="player-stat"><span class="stat-label">ПРАКИ</span><span class="stat-value">${p.stats?.matches || '0'}</span></div>
+                    <div class="player-stat"><span class="stat-label">ЧАСЫ</span><span class="stat-value">${p.stats?.hours || '0'}</span></div>
+                    <div class="player-stat"><span class="stat-label">РАНГ</span><span class="stat-value">${p.rank || 'LEGENDS'}</span></div>
                 </div>
-                <div class="player-device">${p.device}</div>
+                <div class="player-device">${p.device || '📱'}</div>
             </div>
         `).join('');
     }
     
-    if (reserve) {
-        reserve.innerHTML = JAVATEAM_DB.getReserveRoster().map(p => `
+    if (reserveContainer) {
+        reserveContainer.innerHTML = reserveRoster.map(p => `
             <div class="player-card">
                 <div class="player-nick">${p.nick}</div>
-                <div class="player-id">ID: ${p.uid}</div>
+                <div class="player-id">ID: ${p.id}</div>
                 <div class="player-stats">
-                    <div class="player-stat"><span class="stat-label">K/D</span><span class="stat-value">${p.kd}</span></div>
-                    <div class="player-stat"><span class="stat-label">ПРАКИ</span><span class="stat-value">${p.pracs}</span></div>
-                    <div class="player-stat"><span class="stat-label">ЧАСЫ</span><span class="stat-value">${p.hours}</span></div>
-                    <div class="player-stat"><span class="stat-label">РАНГ</span><span class="stat-value">${p.rank}</span></div>
+                    <div class="player-stat"><span class="stat-label">K/D</span><span class="stat-value">${p.stats?.kd || '0'}</span></div>
+                    <div class="player-stat"><span class="stat-label">ПРАКИ</span><span class="stat-value">${p.stats?.matches || '0'}</span></div>
+                    <div class="player-stat"><span class="stat-label">ЧАСЫ</span><span class="stat-value">${p.stats?.hours || '0'}</span></div>
+                    <div class="player-stat"><span class="stat-label">РАНГ</span><span class="stat-value">${p.rank || 'UNRANKED'}</span></div>
                 </div>
-                <div class="player-device">${p.device}</div>
+                <div class="player-device">${p.device || '💻'}</div>
             </div>
         `).join('');
     }
@@ -269,15 +298,47 @@ function renderRoster() {
 (function() {
     const btn = document.getElementById('backToTop');
     if (!btn) return;
-    window.addEventListener('scroll', () => btn.classList.toggle('show', window.scrollY > 500));
-    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    
+    window.addEventListener('scroll', () => {
+        btn.classList.toggle('show', window.scrollY > 500);
+    });
+    
+    btn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+})();
+
+// ===== FAQ АККОРДЕОН =====
+(function() {
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        
+        question.addEventListener('click', () => {
+            const isActive = item.classList.contains('active');
+            faqItems.forEach(i => i.classList.remove('active'));
+            if (!isActive) item.classList.add('active');
+        });
+    });
 })();
 
 // ===== ЗАПУСК =====
 document.addEventListener('DOMContentLoaded', () => {
-    renderRoster();
-    loadData();
-    setInterval(loadData, 3000);
+    console.log('JAVATEAM инициализация...');
+    
+    if (typeof JAVATEAM_DB !== 'undefined') {
+        console.log('✅ База данных найдена');
+        renderRoster();
+        loadData();
+        setInterval(loadData, 3000);
+    } else {
+        console.error('❌ База данных не найдена!');
+    }
 });
 
-window.scrollToSection = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+window.scrollToSection = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+};
+
+console.log('%c╔════════════════════════════════════════╗\n║     JAVATEAM v2.0 ЗАГРУЖЕН            ║\n╚════════════════════════════════════════╝', 'color: #7C3AED; font-weight: bold;');
