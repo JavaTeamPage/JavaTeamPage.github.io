@@ -478,3 +478,67 @@ window.scrollToSection = function(id) {
 };
 
 console.log('%c╔════════════════════════════════════════╗\n║     JAVATEAM v4.0 ЗАГРУЖЕН            ║\n╚════════════════════════════════════════╝', 'color: #7C3AED; font-weight: bold;');
+// ===== ВРЕМЕННОЕ РЕШЕНИЕ - СОСТАВ НАПРЯМУЮ =====
+(function() {
+    console.log('🔄 Загружаю состав напрямую...');
+    
+    const mainRoster = [
+        { nick: 'Эклипсе', uid: '159742523', kd: '0', pracs: '0', hours: '0', rank: 'LEGENDS', device: '📱' },
+        { nick: 'Bloodaim', uid: '228967585', kd: '0', pracs: '0', hours: '0', rank: 'LEGENDS', device: '📱' },
+        { nick: 'D3lrayyy', uid: '165878779', kd: '0', pracs: '0', hours: '0', rank: 'LEGENDS', device: '📱' },
+        { nick: 'Desent', uid: '78443609', kd: '0', pracs: '0', hours: '0', rank: 'LEGENDS', device: '📱' },
+        { nick: 'Lukolivov', uid: '18587432', kd: '0', pracs: '0', hours: '0', rank: 'LEGENDS', device: '📱' }
+    ];
+    
+    const reserveRoster = [
+        { nick: 'Blast', uid: '11223344', kd: '0', pracs: '0', hours: '0', rank: 'UNRANKED', device: '💻' },
+        { nick: 'Qw3ak', uid: '55667788', kd: '0', pracs: '0', hours: '0', rank: 'UNRANKED', device: '💻' },
+        { nick: 'Paradox', uid: '99001122', kd: '0', pracs: '0', hours: '0', rank: 'UNRANKED', device: '💻' }
+    ];
+    
+    function renderDirectRoster() {
+        const mainContainer = document.getElementById('mainRoster');
+        const reserveContainer = document.getElementById('reserveRoster');
+        
+        if (mainContainer) {
+            mainContainer.innerHTML = mainRoster.map(player => `
+                <div class="player-card">
+                    <div class="player-nick">${player.nick}</div>
+                    <div class="player-id">ID: ${player.uid}</div>
+                    <div class="player-stats">
+                        <div class="player-stat"><span class="stat-label">K/D</span><span class="stat-value">${player.kd}</span></div>
+                        <div class="player-stat"><span class="stat-label">ПРАКИ</span><span class="stat-value">${player.pracs}</span></div>
+                        <div class="player-stat"><span class="stat-label">ЧАСЫ</span><span class="stat-value">${player.hours}</span></div>
+                        <div class="player-stat"><span class="stat-label">РАНГ</span><span class="stat-value">${player.rank}</span></div>
+                    </div>
+                    <div class="player-device">${player.device}</div>
+                </div>
+            `).join('');
+            console.log('✅ Основной состав загружен');
+        }
+        
+        if (reserveContainer) {
+            reserveContainer.innerHTML = reserveRoster.map(player => `
+                <div class="player-card">
+                    <div class="player-nick">${player.nick}</div>
+                    <div class="player-id">ID: ${player.uid}</div>
+                    <div class="player-stats">
+                        <div class="player-stat"><span class="stat-label">K/D</span><span class="stat-value">${player.kd}</span></div>
+                        <div class="player-stat"><span class="stat-label">ПРАКИ</span><span class="stat-value">${player.pracs}</span></div>
+                        <div class="player-stat"><span class="stat-label">ЧАСЫ</span><span class="stat-value">${player.hours}</span></div>
+                        <div class="player-stat"><span class="stat-label">РАНГ</span><span class="stat-value">${player.rank}</span></div>
+                    </div>
+                    <div class="player-device">${player.device}</div>
+                </div>
+            `).join('');
+            console.log('✅ Резервный состав загружен');
+        }
+    }
+    
+    // Загружаем при готовности DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderDirectRoster);
+    } else {
+        renderDirectRoster();
+    }
+})();
