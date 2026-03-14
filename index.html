@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>JAVATEAM | Официальный сайт киберспортивной организации</title>
+    
+    <!-- ================================================ -->
+    <!-- META ТЕГИ И SEO                                   -->
+    <!-- ================================================ -->
+    <meta name="description" content="JAVATEAM - профессиональная киберспортивная команда по Standoff 2. Подача заявок на праки, статистика игроков, история матчей.">
+    <meta name="keywords" content="JAVATEAM, джаватим, Standoff 2, киберспорт, праки, тренировки, состав команды">
+    <meta name="author" content="JAVATEAM">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Социальные сети -->
+    <meta property="og:title" content="JAVATEAM | Официальный сайт">
+    <meta property="og:description" content="Профессиональная киберспортивная команда по Standoff 2">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://javateam.github.io">
+    <meta property="og:image" content="assets/og-image.jpg">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="JAVATEAM | Официальный сайт">
+    <meta name="twitter:description" content="Профессиональная киберспортивная команда по Standoff 2">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    
+    <!-- ================================================ -->
+    <!-- ШРИФТЫ                                            -->
+    <!-- ================================================ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- ================================================ -->
+    <!-- ИКОНКИ (Bootstrap Icons)                          -->
+    <!-- ================================================ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- ================================================ -->
+    <!-- AOS АНИМАЦИИ                                      -->
+    <!-- ================================================ -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- ================================================ -->
+    <!-- ОСНОВНОЙ СТИЛЬ                                    -->
+    <!-- ================================================ -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ================================================ -->
+    <!-- ПРЕЛОАДЕР (СУПЕР АНИМИРОВАННЫЙ)                   -->
+    <!-- ================================================ -->
+    <div class="preloader" id="preloader">
+        <div class="preloader-container">
+            <div class="preloader-logo-wrapper">
+                <div class="preloader-logo-glow"></div>
+                <div class="preloader-logo">JAVATEAM</div>
+            </div>
+            
+            <div class="preloader-progress-wrapper">
+                <div class="preloader-progress">
+                    <div class="preloader-bar" id="preloaderBar"></div>
+                </div>
+                <div class="preloader-percent" id="preloaderPercent">0%</div>
+            </div>
+            
+            <div class="preloader-status">
+                <div class="preloader-status-item">
+                    <span class="status-dot pulse"></span>
+                    <span>ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ</span>
+                </div>
+                <div class="preloader-status-item">
+                    <span class="status-dot pulse" style="animation-delay: 0.3s"></span>
+                    <span>ЗАГРУЗКА ДАННЫХ</span>
+                </div>
+                <div class="preloader-status-item">
+                    <span class="status-dot pulse" style="animation-delay: 0.6s"></span>
+                    <span>ПОДКЛЮЧЕНИЕ К БАЗЕ</span>
+                </div>
+            </div>
+            
+            <div class="preloader-version">v4.0.0</div>
+        </div>
+    </div>
+
+    <!-- ================================================ -->
+    <!-- КАСТОМНЫЙ КУРСОР (ДЛЯ ПК)                         -->
+    <!-- ================================================ -->
+    <div class="custom-cursor" id="customCursor"></div>
+    <div class="custom-cursor-dot" id="customCursorDot"></div>
+
+    <!-- ================================================ -->
+    <!-- МОБИЛЬНОЕ МЕНЮ (ПРЕМИУМ)                          -->
+    <!-- ================================================ -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <div class="mobile-menu-logo">
+                <span class="logo-glow"></span>
+                JAVATEAM
+            </div>
+            <button class="mobile-menu-close" id="mobileMenuClose">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-menu-body">
+            <nav class="mobile-nav">
+                <a href="#home" class="mobile-nav-link" data-text="ГЛАВНАЯ">
+                    <span class="link-icon"><i class="bi bi-house-door"></i></span>
+                    <span class="link-text">ГЛАВНАЯ</span>
+                    <span class="link-glow"></span>
+                </a>
+                <a href="#practices" class="mobile-nav-link" data-text="ПРАКИ">
+                    <span class="link-icon"><i class="bi bi-controller"></i></span>
+                    <span class="link-text">ПРАКИ</span>
+                    <span class="link-glow"></span>
+                </a>
+                <a href="#roster" class="mobile-nav-link" data-text="СОСТАВ">
+                    <span class="link-icon"><i class="bi bi-people"></i></span>
+                    <span class="link-text">СОСТАВ</span>
+                    <span class="link-glow"></span>
+                </a>
+                <a href="#history" class="mobile-nav-link" data-text="СЫГРАННЫЕ">
+                    <span class="link-icon"><i class="bi bi-clock-history"></i></span>
+                    <span class="link-text">СЫГРАННЫЕ</span>
+                    <span class="link-glow"></span>
+                </a>
+                <a href="#about" class="mobile-nav-link" data-text="О САЙТЕ">
+                    <span class="link-icon"><i class="bi bi-info-circle"></i></span>
+                    <span class="link-text">О САЙТЕ</span>
+                    <span class="link-glow"></span>
+                </a>
+            </nav>
+        </div>
+        
+        <div class="mobile-menu-footer">
+            <div class="mobile-status">
+                <span class="status-dot online"></span>
+                <span>ONLINE</span>
+            </div>
+            <div class="mobile-social">
+                <a href="https://t.me/JavaTeamOffical" target="_blank" class="mobile-social-link">
+                    <i class="bi bi-telegram"></i>
+                </a>
+                <a href="#" target="_blank" class="mobile-social-link">
+                    <i class="bi bi-discord"></i>
+                </a>
+                <a href="#" target="_blank" class="mobile-social-link">
+                    <i class="bi bi-youtube"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================ -->
+    <!-- ШАПКА САЙТА (ФИКСИРОВАННАЯ)                       -->
+    <!-- ================================================ -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-wrapper">
+                <div class="header-left">
+                    <a href="#" class="logo" data-aos="fade-right" data-aos-duration="800">
+                        <span class="logo-text">JAVA</span>
+                        <span class="logo-text-accent">TEAM</span>
+                        <div class="logo-glow"></div>
+                    </a>
+                </div>
+                
+                <div class="header-center">
+                    <nav class="main-nav">
+                        <a href="#home" class="nav-link" data-aos="fade-down" data-aos-duration="800" data-aos-delay="100">
+                            <span class="nav-text">Главная</span>
+                            <span class="nav-indicator"></span>
+                        </a>
+                        <a href="#practices" class="nav-link" data-aos="fade-down" data-aos-duration="800" data-aos-delay="150">
+                            <span class="nav-text">Праки</span>
+                            <span class="nav-indicator"></span>
+                        </a>
+                        <a href="#roster" class="nav-link" data-aos="fade-down" data-aos-duration="800" data-aos-delay="200">
+                            <span class="nav-text">Состав</span>
+                            <span class="nav-indicator"></span>
+                        </a>
+                        <a href="#history" class="nav-link" data-aos="fade-down" data-aos-duration="800" data-aos-delay="250">
+                            <span class="nav-text">Сыгранные</span>
+                            <span class="nav-indicator"></span>
+                        </a>
+                        <a href="#about" class="nav-link" data-aos="fade-down" data-aos-duration="800" data-aos-delay="300">
+                            <span class="nav-text">О сайте</span>
+                            <span class="nav-indicator"></span>
+                        </a>
+                    </nav>
+                </div>
+                
+                <div class="header-right">
+                    <div class="header-status" data-aos="fade-left" data-aos-duration="800">
+                        <span class="status-dot online"></span>
+                        <span class="status-text">ONLINE</span>
+                    </div>
+                    
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle" data-aos="fade-left" data-aos-duration="800" data-aos-delay="100">
+                        <span class="toggle-line"></span>
+                        <span class="toggle-line"></span>
+                        <span class="toggle-line"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================================================ -->
+    <!-- ГЛАВНАЯ СЕКЦИЯ (HERO)                             -->
+    <!-- ================================================ -->
+    <section id="home" class="hero">
+        <!-- Фоновые эффекты -->
+        <div class="hero-background">
+            <div class="hero-gradient"></div>
+            <div class="hero-grid"></div>
+            <div class="hero-particles" id="heroParticles"></div>
+            <div class="hero-vignette"></div>
+        </div>
+        
+        <div class="container">
+            <div class="hero-wrapper">
+                <div class="hero-content" data-aos="fade-right" data-aos-duration="1000">
+                    <div class="hero-tag" data-aos="fade-up" data-aos-duration="600">
+                        <span class="tag-badge">STANDOFF 2</span>
+                        <span class="tag-line"></span>
+                    </div>
+                    
+                    <h1 class="hero-title" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
+                        <span class="title-line">JAVA</span>
+                        <span class="title-line accent">TEAM</span>
+                    </h1>
+                    
+                    <p class="hero-description" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
+                        Профессиональная киберспортивная команда. 
+                        Подавайте заявки на тренировочные матчи, 
+                        следите за статистикой и результатами игр.
+                    </p>
+                    
+                    <div class="hero-stats" data-aos="fade-up" data-aos-duration="800" data-aos-delay="300">
+                        <div class="stat-card">
+                            <span class="stat-number">0%</span>
+                            <span class="stat-label">WIN RATE</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">ПРАКОВ</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number">8</span>
+                            <span class="stat-label">ИГРОКОВ</span>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-actions" data-aos="fade-up" data-aos-duration="800" data-aos-delay="400">
+                        <button class="hero-btn primary" onclick="scrollToSection('practices')">
+                            <span>Подать заявку</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <button class="hero-btn secondary" onclick="scrollToSection('roster')">
+                            <span>Состав</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="hero-match" data-aos="fade-left" data-aos-duration="1000">
+                    <div class="match-card">
+                        <div class="match-card-glow"></div>
+                        
+                        <div class="match-header">
+                            <span class="match-label">МАТЧ ЦЕНТР</span>
+                            <span class="match-badge dev">DEV</span>
+                        </div>
+                        
+                        <div class="match-teams">
+                            <div class="match-team">
+                                <span class="team-name">JAVA</span>
+                                <span class="team-score">--</span>
+                            </div>
+                            <span class="match-vs">VS</span>
+                            <div class="match-team opponent">
+                                <span class="team-score">--</span>
+                                <span class="team-name">---</span>
+                            </div>
+                        </div>
+                        
+                        <div class="match-info">
+                            <div class="match-timer">--:--</div>
+                            <div class="match-league">В РАЗРАБОТКЕ</div>
+                        </div>
+                        
+                        <div class="match-progress">
+                            <div class="progress-bar" style="width: 0%"></div>
+                        </div>
+                        
+                        <div class="match-decoration">
+                            <div class="decoration-circle"></div>
+                            <div class="decoration-circle"></div>
+                            <div class="decoration-circle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hero-scroll">
+            <span class="scroll-text">SCROLL</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- СЕКЦИЯ ПРАКИ (ПОЛНАЯ ФОРМА)                       -->
+    <!-- ================================================ -->
+    <section id="practices" class="section practices">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">ТРЕНИРОВКИ</span>
+                <h2 class="section-title">
+                    <span class="title-number">01</span>
+                    ЗАПИСЬ НА ПРАКИ
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="practices-wrapper">
+                <div class="practices-grid">
+                    <!-- ЛЕВАЯ КОЛОНКА - ФОРМА -->
+                    <div class="practice-card" data-aos="fade-right" data-aos-duration="800">
+                        <div class="card-header">
+                            <h3 class="card-title">НОВАЯ ЗАЯВКА</h3>
+                            <div class="card-line"></div>
+                        </div>
+                        
+                        <!-- БЛОК С ВРЕМЕНЕМ -->
+                        <div class="time-block">
+                            <label class="block-label">
+                                <i class="bi bi-clock"></i>
+                                ДОСТУПНОЕ ВРЕМЯ
+                            </label>
+                            <div id="availableTimeBlock" class="time-slots">
+                                <div class="empty-state">
+                                    <i class="bi bi-clock"></i>
+                                    <span>Нет доступного времени</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ПОЛЯ ФОРМЫ -->
+                        <div class="form-block">
+                            <!-- Название команды -->
+                            <div class="form-group">
+                                <label>
+                                    <i class="bi bi-trophy"></i>
+                                    НАЗВАНИЕ КОМАНДЫ
+                                </label>
+                                <input type="text" id="teamName" class="form-input" placeholder="7WEEN" autocomplete="off">
+                                <div class="input-focus-glow"></div>
+                            </div>
+                            
+                            <!-- Ник и ID капитана -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>
+                                        <i class="bi bi-person"></i>
+                                        НИК КАПИТАНА
+                                    </label>
+                                    <input type="text" id="captainNick" class="form-input" placeholder="YourNick" autocomplete="off">
+                                    <div class="input-focus-glow"></div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>
+                                        <i class="bi bi-hash"></i>
+                                        ID КАПИТАНА
+                                    </label>
+                                    <input type="text" id="captainId" class="form-input" placeholder="12345678" autocomplete="off">
+                                    <div class="input-focus-glow"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Telegram -->
+                            <div class="form-group">
+                                <label>
+                                    <i class="bi bi-telegram"></i>
+                                    КОНТАКТ (TG)
+                                </label>
+                                <input type="text" id="captainTag" class="form-input" placeholder="@username" autocomplete="off">
+                                <div class="input-focus-glow"></div>
+                            </div>
+                            
+                            <!-- Выбор карт -->
+                            <div class="form-group">
+                                <label>
+                                    <i class="bi bi-map"></i>
+                                    КАРТЫ (МАКС. 3)
+                                </label>
+                                <div class="maps-grid">
+                                    <div class="map-item" data-map="Sandstone">
+                                        <div class="map-checkbox"></div>
+                                        <span class="map-name">Sandstone</span>
+                                    </div>
+                                    <div class="map-item" data-map="Rust">
+                                        <div class="map-checkbox"></div>
+                                        <span class="map-name">Rust</span>
+                                    </div>
+                                    <div class="map-item" data-map="Dune">
+                                        <div class="map-checkbox"></div>
+                                        <span class="map-name">Dune</span>
+                                    </div>
+                                    <div class="map-item" data-map="Province">
+                                        <div class="map-checkbox"></div>
+                                        <span class="map-name">Province</span>
+                                    </div>
+                                    <div class="map-item" data-map="Breeze">
+                                        <div class="map-checkbox"></div>
+                                        <span class="map-name">Breeze</span>
+                                    </div>
+                                    <div class="map-item" data-map="Zone 9">
+                                        <div class="map-checkbox"></div>
+                                        <span class="map-name">Zone 9</span>
+                                    </div>
+                                    <div class="map-item" data-map="Hanami">
+                                        <div class="map-checkbox"></div>
+                                        <span class="map-name">Hanami</span>
+                                    </div>
+                                </div>
+                                <div class="maps-counter" id="mapsCounter">0 / 3</div>
+                            </div>
+                            
+                            <!-- Состав команды -->
+                            <div class="form-group">
+                                <label>
+                                    <i class="bi bi-people"></i>
+                                    СОСТАВ (5 ИГРОКОВ)
+                                </label>
+                                <input type="text" id="roster" class="form-input" placeholder="nick1, nick2, nick3, nick4, nick5" autocomplete="off">
+                                <div class="input-focus-glow"></div>
+                            </div>
+                            
+                            <!-- Кнопка отправки -->
+                            <button class="submit-btn" onclick="submitPractice()">
+                                <span>ОТПРАВИТЬ ЗАЯВКУ</span>
+                                <i class="bi bi-send"></i>
+                            </button>
+                            
+                            <!-- Подсказка -->
+                            <p class="form-note">
+                                <i class="bi bi-info-circle"></i>
+                                После отправки заявка будет рассмотрена администратором
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- ПРАВАЯ КОЛОНКА - ПОДТВЕРЖДЕННЫЕ ПРАКИ -->
+                    <div class="confirmed-card" data-aos="fade-left" data-aos-duration="800">
+                        <div class="card-header">
+                            <h3 class="card-title">ПОДТВЕРЖДЁННЫЕ ПРАКИ</h3>
+                            <div class="card-line"></div>
+                        </div>
+                        
+                        <div id="confirmedList" class="confirmed-list">
+                            <div class="empty-state">
+                                <i class="bi bi-calendar-x"></i>
+                                <span>Нет подтвержденных праков</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- СЕКЦИЯ СОСТАВ (ОСНОВНОЙ + РЕЗЕРВ)                -->
+    <!-- ================================================ -->
+    <section id="roster" class="section roster">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">НАША КОМАНДА</span>
+                <h2 class="section-title">
+                    <span class="title-number">02</span>
+                    ОСНОВНОЙ СОСТАВ
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="roster-grid" id="mainRoster"></div>
+            
+            <div class="section-header" style="margin-top: 60px;" data-aos="fade-up">
+                <h2 class="section-title">
+                    <span class="title-number">03</span>
+                    РЕЗЕРВНЫЙ СОСТАВ
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="roster-grid" id="reserveRoster"></div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- СЕКЦИЯ СЫГРАННЫЕ ПРАКИ (ИСТОРИЯ)                 -->
+    <!-- ================================================ -->
+    <section id="history" class="section history">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">ИСТОРИЯ</span>
+                <h2 class="section-title">
+                    <span class="title-number">04</span>
+                    СЫГРАННЫЕ ПРАКИ
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="history-table" id="historyList" data-aos="fade-up">
+                <div class="empty-state">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Нет сыгранных праков</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- СЕКЦИЯ О САЙТЕ                                    -->
+    <!-- ================================================ -->
+    <section id="about" class="section about">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">ИНФОРМАЦИЯ</span>
+                <h2 class="section-title">
+                    <span class="title-number">05</span>
+                    О САЙТЕ
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="about-grid">
+                <div class="about-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="about-icon">
+                        <i class="bi bi-info-circle"></i>
+                    </div>
+                    <h3>О ПРОЕКТЕ</h3>
+                    <p>JAVATEAM - профессиональная киберспортивная организация по Standoff 2. Мы предоставляем платформу для организации тренировочных матчей и отслеживания статистики.</p>
+                </div>
+                
+                <div class="about-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="about-icon">
+                        <i class="bi bi-gear"></i>
+                    </div>
+                    <h3>КАК ЭТО РАБОТАЕТ</h3>
+                    <ul>
+                        <li>Администратор добавляет свободное время</li>
+                        <li>Вы выбираете удобный слот</li>
+                        <li>Заполняете данные команды</li>
+                        <li>Отправляете заявку</li>
+                        <li>Получаете подтверждение</li>
+                    </ul>
+                </div>
+                
+                <div class="about-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="about-icon">
+                        <i class="bi bi-envelope"></i>
+                    </div>
+                    <h3>КОНТАКТЫ</h3>
+                    <p>По всем вопросам:</p>
+                    <a href="https://t.me/JavaTeamOffical" target="_blank" class="about-link">
+                        <i class="bi bi-telegram"></i>
+                        TELEGRAM
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- ПАРТНЕРЫ                                          -->
+    <!-- ================================================ -->
+    <section class="section partners">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">ПАРТНЕРЫ</span>
+                <h2 class="section-title">
+                    <span class="title-number">06</span>
+                    НАШИ ПАРТНЕРЫ
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="partners-grid">
+                <div class="partner-item" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="partner-placeholder">PARTNER 1</div>
+                </div>
+                <div class="partner-item" data-aos="zoom-in" data-aos-delay="150">
+                    <div class="partner-placeholder">PARTNER 2</div>
+                </div>
+                <div class="partner-item" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="partner-placeholder">PARTNER 3</div>
+                </div>
+                <div class="partner-item" data-aos="zoom-in" data-aos-delay="250">
+                    <div class="partner-placeholder">PARTNER 4</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- FAQ (ЧАСТО ЗАДАВАЕМЫЕ ВОПРОСЫ)                    -->
+    <!-- ================================================ -->
+    <section class="section faq">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">FAQ</span>
+                <h2 class="section-title">
+                    <span class="title-number">07</span>
+                    ЧАСТЫЕ ВОПРОСЫ
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="faq-grid">
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
+                    <div class="faq-question">
+                        <span>Как подать заявку на прак?</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Выберите свободное время из доступных слотов, заполните все поля формы и нажмите "Отправить заявку". Администратор рассмотрит её и подтвердит.
+                    </div>
+                </div>
+                
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="150">
+                    <div class="faq-question">
+                        <span>Сколько ждать подтверждения?</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Обычно подтверждение приходит в течение нескольких минут. Вы можете следить за статусом в разделе "Праки".
+                    </div>
+                </div>
+                
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+                    <div class="faq-question">
+                        <span>Можно ли выбрать больше 3 карт?</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Нет, максимум 3 карты за один прак. Это ограничение для баланса тренировок.
+                    </div>
+                </div>
+                
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="250">
+                    <div class="faq-question">
+                        <span>Как связаться с администрацией?</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        Все вопросы можно задать в нашем Telegram канале: @JavaTeamOffical
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- СТАТИСТИКА КОМАНДЫ                               -->
+    <!-- ================================================ -->
+    <section class="section stats-detailed">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">СТАТИСТИКА</span>
+                <h2 class="section-title">
+                    <span class="title-number">08</span>
+                    ДОСТИЖЕНИЯ
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="stats-detailed-grid">
+                <div class="stat-detailed-card" data-aos="flip-left" data-aos-delay="100">
+                    <div class="stat-detailed-icon">
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                    <div class="stat-detailed-content">
+                        <span class="stat-detailed-value">0</span>
+                        <span class="stat-detailed-label">Турнирных побед</span>
+                    </div>
+                </div>
+                
+                <div class="stat-detailed-card" data-aos="flip-left" data-aos-delay="150">
+                    <div class="stat-detailed-icon">
+                        <i class="bi bi-controller"></i>
+                    </div>
+                    <div class="stat-detailed-content">
+                        <span class="stat-detailed-value">0</span>
+                        <span class="stat-detailed-label">Сыграно матчей</span>
+                    </div>
+                </div>
+                
+                <div class="stat-detailed-card" data-aos="flip-left" data-aos-delay="200">
+                    <div class="stat-detailed-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="stat-detailed-content">
+                        <span class="stat-detailed-value">8</span>
+                        <span class="stat-detailed-label">Игроков в команде</span>
+                    </div>
+                </div>
+                
+                <div class="stat-detailed-card" data-aos="flip-left" data-aos-delay="250">
+                    <div class="stat-detailed-icon">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                    <div class="stat-detailed-content">
+                        <span class="stat-detailed-value">0</span>
+                        <span class="stat-detailed-label">Часов тренировок</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- НОВОСТИ И ОБНОВЛЕНИЯ                              -->
+    <!-- ================================================ -->
+    <section class="section news">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">НОВОСТИ</span>
+                <h2 class="section-title">
+                    <span class="title-number">09</span>
+                    ПОСЛЕДНИЕ ОБНОВЛЕНИЯ
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="news-grid">
+                <div class="news-card" data-aos="fade-right" data-aos-delay="100">
+                    <div class="news-date">
+                        <span class="date-day">15</span>
+                        <span class="date-month">МАР</span>
+                    </div>
+                    <div class="news-content">
+                        <h3>Обновление системы праков</h3>
+                        <p>Теперь заявки обрабатываются быстрее, добавлена возможность выбора карт</p>
+                        <a href="#" class="news-link">Подробнее <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <div class="news-card" data-aos="fade-up" data-aos-delay="150">
+                    <div class="news-date">
+                        <span class="date-day">10</span>
+                        <span class="date-month">МАР</span>
+                    </div>
+                    <div class="news-content">
+                        <h3>Новый состав команды</h3>
+                        <p>Представляем обновленный состав JAVATEAM. Добро пожаловать!</p>
+                        <a href="#" class="news-link">Подробнее <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <div class="news-card" data-aos="fade-left" data-aos-delay="200">
+                    <div class="news-date">
+                        <span class="date-day">05</span>
+                        <span class="date-month">МАР</span>
+                    </div>
+                    <div class="news-content">
+                        <h3>Запуск официального сайта</h3>
+                        <p>Мы рады представить вам наш новый сайт для записи на праки</p>
+                        <a href="#" class="news-link">Подробнее <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- ГАЛЕРЕЯ                                           -->
+    <!-- ================================================ -->
+    <section class="section gallery">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">ГАЛЕРЕЯ</span>
+                <h2 class="section-title">
+                    <span class="title-number">10</span>
+                    МОМЕНТЫ ИГР
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="gallery-grid">
+                <div class="gallery-item" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="gallery-placeholder">
+                        <i class="bi bi-play-circle"></i>
+                    </div>
+                </div>
+                <div class="gallery-item" data-aos="zoom-in" data-aos-delay="150">
+                    <div class="gallery-placeholder">
+                        <i class="bi bi-image"></i>
+                    </div>
+                </div>
+                <div class="gallery-item" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="gallery-placeholder">
+                        <i class="bi bi-camera"></i>
+                    </div>
+                </div>
+                <div class="gallery-item" data-aos="zoom-in" data-aos-delay="250">
+                    <div class="gallery-placeholder">
+                        <i class="bi bi-film"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- КОНТАКТНАЯ ФОРМА                                  -->
+    <!-- ================================================ -->
+    <section class="section contact">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">КОНТАКТЫ</span>
+                <h2 class="section-title">
+                    <span class="title-number">11</span>
+                    СВЯЖИТЕСЬ С НАМИ
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="contact-grid">
+                <div class="contact-info" data-aos="fade-right" data-aos-delay="100">
+                    <h3>Наши контакты</h3>
+                    <ul>
+                        <li>
+                            <i class="bi bi-telegram"></i>
+                            <span>Telegram: @JavaTeamOffical</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-envelope"></i>
+                            <span>Email: javateam@standoff.com</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-discord"></i>
+                            <span>Discord: JAVATEAM</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="contact-form" data-aos="fade-left" data-aos-delay="200">
+                    <h3>Напишите нам</h3>
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <input type="text" placeholder="Ваше имя" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <input type="email" placeholder="Email" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <textarea placeholder="Сообщение" rows="4" class="form-input"></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">ОТПРАВИТЬ</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- КАРТА САЙТА                                       -->
+    <!-- ================================================ -->
+    <section class="section sitemap">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <span class="section-subtitle">НАВИГАЦИЯ</span>
+                <h2 class="section-title">
+                    <span class="title-number">12</span>
+                    КАРТА САЙТА
+                </h2>
+                <div class="section-line"></div>
+            </div>
+            
+            <div class="sitemap-grid" data-aos="fade-up">
+                <div class="sitemap-column">
+                    <h4>Основное</h4>
+                    <ul>
+                        <li><a href="#home">Главная</a></li>
+                        <li><a href="#practices">Праки</a></li>
+                        <li><a href="#roster">Состав</a></li>
+                        <li><a href="#history">Сыгранные</a></li>
+                        <li><a href="#about">О сайте</a></li>
+                    </ul>
+                </div>
+                
+                <div class="sitemap-column">
+                    <h4>Информация</h4>
+                    <ul>
+                        <li><a href="#">Новости</a></li>
+                        <li><a href="#">Статистика</a></li>
+                        <li><a href="#">Галерея</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Контакты</a></li>
+                    </ul>
+                </div>
+                
+                <div class="sitemap-column">
+                    <h4>Социальные сети</h4>
+                    <ul>
+                        <li><a href="https://t.me/JavaTeamOffical" target="_blank">Telegram</a></li>
+                        <li><a href="#">Discord</a></li>
+                        <li><a href="#">YouTube</a></li>
+                        <li><a href="#">Twitch</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================ -->
+    <!-- ФУТЕР (ПОДВАЛ)                                    -->
+    <!-- ================================================ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-logo-wrapper">
+                    <div class="footer-logo">JAVATEAM</div>
+                    <p class="footer-description">Профессиональная киберспортивная организация по Standoff 2</p>
+                </div>
+                
+                <div class="footer-links">
+                    <a href="#home">Главная</a>
+                    <a href="#practices">Праки</a>
+                    <a href="#roster">Состав</a>
+                    <a href="#history">Сыгранные</a>
+                    <a href="#about">О сайте</a>
+                </div>
+                
+                <div class="footer-social">
+                    <a href="https://t.me/JavaTeamOffical" target="_blank" class="social-icon">
+                        <i class="bi bi-telegram"></i>
+                    </a>
+                    <a href="#" target="_blank" class="social-icon">
+                        <i class="bi bi-discord"></i>
+                    </a>
+                    <a href="#" target="_blank" class="social-icon">
+                        <i class="bi bi-youtube"></i>
+                    </a>
+                    <a href="#" target="_blank" class="social-icon">
+                        <i class="bi bi-twitch"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 JAVATEAM. Все права защищены. v4.0.0</p>
+                <p>Сделано с ❤️ для комьюнити</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================================================ -->
+    <!-- КНОПКА НАВЕРХ                                     -->
+    <!-- ================================================ -->
+    <button class="back-to-top" id="backToTop">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <!-- ================================================ -->
+    <!-- СКРИПТЫ                                           -->
+    <!-- ================================================ -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100,
+            easing: 'ease-out-cubic'
+        });
+    </script>
+    <script src="database.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
