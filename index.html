@@ -1065,3 +1065,26 @@
     <script src="script.js"></script>
 </body>
 </html>
+    <!-- Firebase SDK (ДОБАВЛЯЕМ БАЗУ ДАННЫХ) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+    
+    <script>
+        // ===== FIREBASE КОНФИГУРАЦИЯ =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyCIh7s8V7UF_ZOMygDaMf3B9drKu8kNTR0",
+            authDomain: "javateam-f6187.firebaseapp.com",
+            projectId: "javateam-f6187",
+            storageBucket: "javateam-f6187.firebasestorage.app",
+            messagingSenderId: "778258022888",
+            appId: "1:778258022888:web:c06537ea3fa387fc2ae45d"
+        };
+
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        console.log("🔥 Firebase подключен!");
+    </script>
+    
+    <!-- Твой основной скрипт (НЕ МЕНЯЕМ) -->
+    <script src="script.js"></script>
